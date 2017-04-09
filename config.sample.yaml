@@ -1,0 +1,9 @@
+auth:
+    user: <your username>
+    passwd: <your password>
+playlists:
+    monthly_added:
+# dev:
+#     debug: true
+#     libraryCache: library.pickle
+#     dbFile: library.db
