@@ -1,25 +1,28 @@
-from gmusicapi import Mobileclient
-from .library import LibraryDb
-import pickle
-import sqlite3
-import logging
+import time
 import datetime
+import logging
+import pickle
+
+from gmusicapi import Mobileclient
+
+from .db.library import LibraryDb
+from .gpm.playlist import Playlist
+
 
 class GPMAP:
 
-    def __init__(self, prefix='[GPMAP]', log_level=logging.ERROR, library_cache=None, db_cache=None):
+    def __init__(self, username, password, prefix='[GPMAP]', log_level=logging.ERROR, library_cache=None, db_cache=None):
         logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(__name__)
 
         self.playlist_prefix = prefix
-        self.api = Mobileclient()
+        self.client = Mobileclient(debug_logging=False)
+        self.logger.info('Logging in %s' % username)
+        self.client.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
         self.cache_file = library_cache
         self.library_db = LibraryDb(db_cache)
+        self.timestamp = time.time()
         return
-
-    def login(self, username, password):
-        self.logger.info('Logging in')
-        #return self.api.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
 
     def _get_all_songs(self):
         save_to_cache = False
@@ -31,7 +34,7 @@ class GPMAP:
             except:
                 self.logger.error("Reading from cache failed - re-downloading")
         if library == None:
-            library = self.api.get_all_songs(incremental=False)
+            library = self.client.get_all_songs(incremental=False)
             save_to_cache = True
         if self.cache_file != None and save_to_cache == True:
             self.logger.info("Saving to cache " + self.cache_file)
@@ -45,11 +48,20 @@ class GPMAP:
         library = self._get_all_songs()
         self.library_db.ingest(library)
 
+    def cleanup_previous_playlists(self):
+        for pl in self.client.get_all_playlists():
+            if pl['name'].startswith(self.playlist_prefix):
+                self.logger.info('Deleting %s: %s' % (pl['id'], pl['name']))
+                self.client.delete_playlist(pl['id'])
+
     def generate_playlist(self, type, config):
         gen_func = getattr(self, type)
         if (gen_func == None):
             self.logger.fatal('Method %s does not exist' % (type))
         gen_func(config)
+
+    def playlist_description(self):
+        return "created:%d" % self.timestamp
 
     def monthly_added(self, config):
         songsByMonth = {}
@@ -59,6 +71,11 @@ class GPMAP:
             created_time = created_time_ms / (10 ** 6)
             created_yearmonth = datetime.datetime.fromtimestamp(created_time).strftime('%Y-%m')
             if songsByMonth.has_key(created_yearmonth) == False:
-                songsByMonth[created_yearmonth] = []
-            songsByMonth[created_yearmonth].append(s)
-        print songsByMonth
+                songsByMonth[created_yearmonth] = Playlist(self.playlist_prefix + ' Added in ' + created_yearmonth)
+            songsByMonth[created_yearmonth].add_track(s.id)
+        for m in sorted(songsByMonth.keys()):
+            pl = songsByMonth[m]
+            for p in pl.get_ingestable_playlists():
+                self.logger.info("Creating playlist " + p.name)
+                playlist_id = self.client.create_playlist(p.name, description=self.playlist_description())
+                self.client.add_songs_to_playlist(playlist_id, p.tracks)
