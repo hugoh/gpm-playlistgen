@@ -8,6 +8,7 @@ from gpmap.gpmap import GPMAP
 def build_argparser():
     parser = argparse.ArgumentParser(description='Create playlists automatically.')
     parser.add_argument('config', type=file, help='Config file')
+    parser.add_argument('--dry-run', action='store_true', help="Don't do any actual changes")
     return parser
 
 def get_cache_path(cfg, cache_type):
@@ -26,10 +27,12 @@ if __name__ == '__main__':
             debug_level = logging.DEBUG
     except:
         pass
+    cfg['dry-run'] = args.dry_run
+
     gpmap = GPMAP(cfg['auth']['user'], cfg['auth']['passwd'],
                   cfg['prefix'], debug_level,
                   library_cache=get_cache_path(cfg, 'libraryCache'),
-                  db_cache=get_cache_path(cfg, 'dbFile'))
+                  db_cache=get_cache_path(cfg, 'dbFile'), dry_run=cfg['dry-run'])
     gpmap.get_library()
     gpmap.cleanup_previous_playlists()
     for playlist in cfg['playlists'].keys():

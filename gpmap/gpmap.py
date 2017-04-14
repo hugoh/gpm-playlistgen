@@ -11,7 +11,7 @@ from .gpm.playlist import Playlist
 
 class GPMAP:
 
-    def __init__(self, username, password, prefix='[GPMAP]', log_level=logging.ERROR, library_cache=None, db_cache=None):
+    def __init__(self, username, password, prefix='[GPMAP]', log_level=logging.ERROR, library_cache=None, db_cache=None, dry_run=False):
         logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ class GPMAP:
         self.cache_file = library_cache
         self.library_db = LibraryDb(db_cache)
         self.timestamp = time.time()
+        self.dry_run = dry_run
         return
 
     def _get_all_songs(self):
@@ -53,7 +54,8 @@ class GPMAP:
             if not Playlist.is_generated_by_gpmap(pl, self.playlist_prefix):
                 continue
             self.logger.info('Deleting %s: %s' % (pl['id'], pl['name']))
-            self.client.delete_playlist(pl['id'])
+            if not self.dry_run:
+                self.client.delete_playlist(pl['id'])
 
     def generate_playlist(self, type, config):
         gen_func = getattr(self, type)
@@ -75,5 +77,6 @@ class GPMAP:
             pl = songsByMonth[m]
             for p in pl.get_ingestable_playlists():
                 self.logger.info("Creating playlist " + p.get_name())
-                playlist_id = self.client.create_playlist(p.get_name(), description=p.get_description())
-                self.client.add_songs_to_playlist(playlist_id, p.tracks)
+                if not self.dry_run:
+                    playlist_id = self.client.create_playlist(p.get_name(), description=p.get_description())
+                    self.client.add_songs_to_playlist(playlist_id, p.tracks)
