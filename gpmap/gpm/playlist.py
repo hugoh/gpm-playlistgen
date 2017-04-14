@@ -1,11 +1,26 @@
 import itertools
+import json
 
 class Playlist:
+    VERSION = 1
+    GENERATEDBY = 'GPMAP'
     PLAYLIST_MAX = 1000
 
-    def __init__(self, name):
+    def __init__(self, name, generated):
         self.name = name
+        self.generated = generated
         self.tracks = []
+
+    def get_name(self):
+        return self.name
+
+    def get_description(self):
+        description = {
+            'version': Playlist.VERSION,
+            'generatedby': Playlist.GENERATEDBY,
+            'generated': self.generated
+        }
+        return json.dumps(description)
 
     def add_track(self, track):
         self.tracks.append(track)

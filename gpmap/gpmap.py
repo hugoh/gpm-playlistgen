@@ -60,9 +60,6 @@ class GPMAP:
             self.logger.fatal('Method %s does not exist' % (type))
         gen_func(config)
 
-    def playlist_description(self):
-        return "created:%d" % self.timestamp
-
     def monthly_added(self, config):
         songsByMonth = {}
         for s in self.library_db.get_tracks("ORDER BY creationTimestamp, discNumber, trackNumber"):
@@ -76,6 +73,6 @@ class GPMAP:
         for m in sorted(songsByMonth.keys()):
             pl = songsByMonth[m]
             for p in pl.get_ingestable_playlists():
-                self.logger.info("Creating playlist " + p.name)
-                playlist_id = self.client.create_playlist(p.name, description=self.playlist_description())
+                self.logger.info("Creating playlist " + p.get_name())
+                playlist_id = self.client.create_playlist(p.get_name(), description=p.get_description())
                 self.client.add_songs_to_playlist(playlist_id, p.tracks)
