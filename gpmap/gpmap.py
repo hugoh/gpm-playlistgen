@@ -50,9 +50,10 @@ class GPMAP:
 
     def cleanup_previous_playlists(self):
         for pl in self.client.get_all_playlists():
-            if pl['name'].startswith(self.playlist_prefix):
-                self.logger.info('Deleting %s: %s' % (pl['id'], pl['name']))
-                self.client.delete_playlist(pl['id'])
+            if not Playlist.is_generated_by_gpmap(pl, self.playlist_prefix):
+                continue
+            self.logger.info('Deleting %s: %s' % (pl['id'], pl['name']))
+            self.client.delete_playlist(pl['id'])
 
     def generate_playlist(self, type, config):
         gen_func = getattr(self, type)

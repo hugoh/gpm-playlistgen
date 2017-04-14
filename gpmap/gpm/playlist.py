@@ -39,3 +39,17 @@ class Playlist:
             yield pl
             item = list(itertools.islice(it, Playlist.PLAYLIST_MAX))
             n += 1
+
+    @staticmethod
+    def is_generated_by_gpmap(playlist_dict, prefix):
+        if len(prefix) == 0:
+            raise Exception('invalid prefix')
+        if not playlist_dict['name'].startswith(prefix):
+            return False
+        try:
+            desc = json.loads(playlist_dict['description'])
+            if desc['version'] == Playlist.VERSION and desc['generatedby'] == Playlist.GENERATEDBY:
+                return True
+        except:
+            return False
+        return False

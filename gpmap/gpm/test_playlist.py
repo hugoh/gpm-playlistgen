@@ -1,10 +1,12 @@
-import unittest
+from unittest import TestCase
+
 from playlist import Playlist
 import json
 
-class TestPlaylist(unittest.TestCase):
 
-    NAME = "foo"
+class TestPlaylist(TestCase):
+    PREFIX = "[GPMAP]"
+    NAME = "%s foo" % PREFIX
     GEN = 123456
 
     def setUp(self):
@@ -39,3 +41,49 @@ class TestPlaylist(unittest.TestCase):
                 l = extra_count
             self.assertEqual(len(pl.tracks), l, "correct length")
         self.assertEqual(list_count, i, "correct number of playlists")
+
+    def test_generated_by_gpmap(self):
+        self.assertTrue(Playlist.is_generated_by_gpmap({
+            'name': self.sample_playlist.get_name(),
+            'description': self.sample_playlist.get_description()
+        }, self.PREFIX))
+
+        self.assertFalse(Playlist.is_generated_by_gpmap({
+            'name': self.sample_playlist.get_name(),
+            'description': self.sample_playlist.get_description()
+        }, "a"))
+
+        desc = json.loads(self.sample_playlist.get_description())
+        desc['version'] = 2
+        self.assertFalse(Playlist.is_generated_by_gpmap({
+            'name': self.sample_playlist.get_name(),
+            'description': json.dumps(desc)
+        }, self.PREFIX))
+
+        desc = json.loads(self.sample_playlist.get_description())
+        del desc['version']
+        self.assertFalse(Playlist.is_generated_by_gpmap({
+            'name': self.sample_playlist.get_name(),
+            'description': json.dumps(desc)
+        }, self.PREFIX))
+
+        desc = json.loads(self.sample_playlist.get_description())
+        del desc['generatedby']
+        self.assertFalse(Playlist.is_generated_by_gpmap({
+            'name': self.sample_playlist.get_name(),
+            'description': json.dumps(desc)
+        }, self.PREFIX))
+
+        self.assertFalse(Playlist.is_generated_by_gpmap({
+            'name': self.sample_playlist.get_name(),
+            'description': self.sample_playlist.get_description()[:-1]
+        }, self.PREFIX))
+
+        try:
+            Playlist.is_generated_by_gpmap({
+                'name': self.sample_playlist.get_name(),
+                'description': self.sample_playlist.get_description()[:-1]
+            }, '')
+            self.fail('exception not raised')
+        except:
+            pass
