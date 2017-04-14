@@ -46,12 +46,14 @@ class GPMAP:
     def get_library(self):
         if self.library_db.is_initialized():
             return
+        # FIXME: also get playlist contents
         library = self._get_all_songs()
         self.library_db.ingest(library)
 
     def cleanup_previous_playlists(self):
         for pl in self.client.get_all_playlists():
             if not Playlist.is_generated_by_gpmap(pl, self.playlist_prefix):
+                self.logger.info('Skipping %s: %s' % (pl['id'], pl['name']))
                 continue
             self.logger.info('Deleting %s: %s' % (pl['id'], pl['name']))
             if not self.dry_run:
