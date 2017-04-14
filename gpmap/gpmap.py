@@ -68,7 +68,7 @@ class GPMAP:
             created_time = created_time_ms / (10 ** 6)
             created_yearmonth = datetime.datetime.fromtimestamp(created_time).strftime('%Y-%m')
             if songsByMonth.has_key(created_yearmonth) == False:
-                songsByMonth[created_yearmonth] = Playlist(self.playlist_prefix + ' Added in ' + created_yearmonth)
+                songsByMonth[created_yearmonth] = Playlist(self.playlist_prefix + ' Added in ' + created_yearmonth, self.timestamp)
             songsByMonth[created_yearmonth].add_track(s.id)
         for m in sorted(songsByMonth.keys()):
             pl = songsByMonth[m]

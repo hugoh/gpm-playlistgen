@@ -34,7 +34,7 @@ class Playlist:
             name = self.name
             if total_count > 1:
                 name += " (%d/%d)" % (n, total_count)
-            pl = Playlist(name)
+            pl = Playlist(name, self.generated)
             pl.tracks = item
             yield pl
             item = list(itertools.islice(it, Playlist.PLAYLIST_MAX))
