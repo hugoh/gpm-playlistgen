@@ -1,8 +1,13 @@
 auth:
-    user: <your username>
-    passwd: <your password>
+    user: <your username> # Username for Google account
+    passwd: <your password> # Password (app-specific if 2FA is enabled)
 playlists:
     monthly_added:
+        # One playlist per months tracks were added to library
+    most_played:
+        # Ordered list of tracks most played
+        include_playlists: true # Include tracks in playlists in addition to library
+        #limit: 1000 # Default is top 1000; it's also the max
 # dev:
 #     debug: true
 #     libraryCache: library.pickle
