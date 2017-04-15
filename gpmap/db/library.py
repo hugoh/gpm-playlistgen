@@ -54,7 +54,7 @@ class LibraryDb:
             cursor.execute('INSERT INTO %s VALUES %s' % (self.GENERATED_PL_DB, db_playlist.to_sql_placeholder()), db_playlist.values())
         self.db_conn.commit()
 
-    def get_tracks(self, query = ''):
+    def get_tracks(self, query=''):
         c = self.db_conn.cursor()
         tracks = []
         for row in c.execute("SELECT * FROM %s %s" % (self.LIBRARY_DB, query)):
@@ -63,7 +63,7 @@ class LibraryDb:
             tracks.append(db_tracks)
         return tracks
 
-    def get_generated_playlists(self, query = ''):
+    def get_generated_playlists(self, query=''):
         c = self.db_conn.cursor()
         playlists = []
         for row in c.execute("SELECT * FROM %s %s" % (self.GENERATED_PL_DB, query)):
