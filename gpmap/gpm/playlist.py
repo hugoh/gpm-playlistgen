@@ -12,15 +12,27 @@ class Playlist:
         self.name = name
         self.generated = generated
         self.tracks = []
+        self.type = None
+        self.args = None
+        self.closed = False
 
     def get_name(self):
         return self.name
+
+    def set_type(self, type):
+        self.type = type
+
+    def set_args(self, args):
+        self.args = args
 
     def get_description(self):
         description = {
             'version': Playlist.VERSION,
             'generatedby': Playlist.GENERATEDBY,
-            'generated': self.generated
+            'generated': self.generated,
+            'type': self.type,
+            'args': self.args,
+            'closed': self.closed
         }
         return json.dumps(description)
 

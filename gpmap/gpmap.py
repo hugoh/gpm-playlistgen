@@ -64,11 +64,10 @@ class GPMAP:
     def generate_playlist(self, type, config):
         generator = PlaylistGenerator(self.playlist_prefix, self.timestamp, self.library_db)
         try:
-            gen_func = getattr(generator, "gen_" + type)
+            playlists = generator.generate(type, config)
         except AttributeError:
             self.logger.error('Method %s does not exist' % (type))
             return
-        playlists = gen_func(config)
         for pl in playlists:
             pl.create_in_gpm(self.writer_client)
 

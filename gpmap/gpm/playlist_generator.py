@@ -4,13 +4,20 @@ import logging
 from .playlist import Playlist
 
 class PlaylistGenerator():
+    MONTHLY_ADDED = 'monthly_added'
+    MOST_PLAYED = 'most_played'
+
     def __init__(self, playlist_prefix, timestamp, library_db):
         self.logger = logging.getLogger(__name__)
         self.playlist_prefix = playlist_prefix
         self.timestamp = timestamp
         self.library_db = library_db
 
-    def gen_monthly_added(self, config):
+    def generate(self, type, config):
+        gen_func = getattr(self, "_gen_" + type)
+        return gen_func(self, config)
+
+    def _gen_monthly_added(self, config):
         songsByMonth = {}
         for track in self.library_db.get_tracks("ORDER BY creationTimestamp, discNumber, trackNumber"):
             # Group by year & month
@@ -18,7 +25,10 @@ class PlaylistGenerator():
             created_time = created_time_ms / (10 ** 6)
             created_yearmonth = datetime.datetime.fromtimestamp(created_time).strftime('%Y-%m')
             if songsByMonth.has_key(created_yearmonth) == False:
-                songsByMonth[created_yearmonth] = Playlist(self.playlist_prefix + ' Added in ' + created_yearmonth, self.timestamp)
+                pl = Playlist(self.playlist_prefix + ' Added in ' + created_yearmonth, self.timestamp)
+                pl.set_type(self.MONTHLY_ADDED)
+                pl.set_args(created_yearmonth)
+                songsByMonth[created_yearmonth] = pl
             songsByMonth[created_yearmonth].add_track(track.id)
         ret = []
         for m in sorted(songsByMonth.keys()):
@@ -27,7 +37,7 @@ class PlaylistGenerator():
                 ret.append(p)
         return ret
 
-    def gen_most_played(self, config):
+    def _gen_most_played(self, config):
         if config.has_key('limit'):
             limit = min(config['limit'], Playlist.PLAYLIST_MAX)
         else:
@@ -38,6 +48,7 @@ class PlaylistGenerator():
         if include_playlists == True:
             self.logger.warn("Playlists not supported yet for most played")
         playlist = Playlist(self.playlist_prefix + ' Most played', self.timestamp)
+        playlist.set_type(self.MOST_PLAYED)
         # FIXME: add recentTimestamp
         for track in self.library_db.get_tracks("ORDER BY playCount DESC LIMIT %d" % limit):
             playlist.add_track(track.id)
