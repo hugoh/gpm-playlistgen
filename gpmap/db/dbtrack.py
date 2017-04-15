@@ -11,16 +11,12 @@ class DbTrack(DbItem):
             DbColumn('creationTimestamp', 'INTEGER'),
             DbColumn('playCount', 'INTEGER')
         ]
-        DbItem.__init__(columns)
+        DbItem.__init__(self, columns)
 
     def from_track(self, track):
         self.id = track.get('id')
-        self.album_id = track.get_string_value('albumId')
-        self.disc_number = track.get_int_value('discNumber')
-        self.track_number = track.get_int_value('trackNumber')
-        self.creation_timestamp = track.get_int_value('creationTimestamp')
-        self.play_count = track.get_int_value('playCount')
-
-    def to_sql(self):
-        return "(%s) VALUES ('%s', '%s', %d, %d, %d, %d)"\
-               % (self.get_columns(), self.id, self.album_id, self.disc_number, self.track_number, self.creation_timestamp, self.play_count)
+        self.album_id = track.get('albumId', '')
+        self.disc_number = int(track.get('discNumber', 0))
+        self.track_number = int(track.get('trackNumber', 0))
+        self.creation_timestamp = int(track.get('creationTimestamp', 0))
+        self.play_count = int(track.get('playCount', 0))

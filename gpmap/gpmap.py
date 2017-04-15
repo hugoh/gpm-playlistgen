@@ -63,12 +63,10 @@ class GPMAP:
         self.library_db.ingest_generated_playlists(playlists)
 
     def cleanup_all_generated_playlists(self):
-        for pl in self.client.get_all_playlists():
-            if not Playlist.is_generated_by_gpmap(pl):
-                self.logger.debug('Skipping %s: %s' % (pl['id'], pl['name']))
-                continue
-            self.logger.info('Deleting %s: %s' % (pl['id'], pl['name']))
-            self.writer_client.delete_playlist(pl['id'])
+        self._get_all_generated_playlists()
+        for pl in self.library_db.get_generated_playlists():
+            self.logger.info('Deleting %s: %s' % (pl.id, pl.name))
+            self.writer_client.delete_playlist(pl.id)
 
     def generate_playlist(self, type, config):
         generator = PlaylistGenerator(self.playlist_prefix, self.timestamp, self.library_db)

@@ -18,6 +18,19 @@ class DbItem:
         for c in self._columns:
             a = c.get_name()
             setattr(self, a, row[i])
+            i += 1
+
+    def to_sql_placeholder(self):
+        placeholder = []
+        for c in self._columns:
+            placeholder.append('?')
+        return '(' + string.join(placeholder, ',') + ')'
+
+    def values(self):
+        values = ()
+        for c in self._columns:
+            values = values + (getattr(self, c.get_name()),)
+        return values
 
 class DbColumn:
     def __init__(self, name, type):
