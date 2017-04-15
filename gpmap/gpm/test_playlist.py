@@ -18,12 +18,24 @@ class TestPlaylist(TestCase):
     def test_name(self):
         self.assertEqual(self.NAME, self.sample_playlist.get_name())
 
+    def _test_playlist_value(self, playlist, version, generatedby, generated, playlist_type, args, closed):
+        obj = json.loads(playlist.get_description())
+        self.assertEqual(obj['version'], version)
+        self.assertEqual(obj['generatedby'], generatedby)
+        self.assertEqual(obj['generated'], generated)
+        self.assertEqual(obj['type'], playlist_type)
+        self.assertEqual(obj['args'], args)
+        self.assertEqual(obj['closed'], closed)
+
     def test_description(self):
-        description = self.sample_playlist.get_description()
-        obj = json.loads(description)
-        self.assertEqual(obj['version'], Playlist.VERSION)
-        self.assertEqual(obj['generatedby'], Playlist.GENERATEDBY)
-        self.assertEqual(obj['generated'], self.GEN)
+        pl = self.sample_playlist
+        self._test_playlist_value(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, None, None, False)
+        pl.set_type("foo")
+        self._test_playlist_value(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, "foo", None, False)
+        pl.set_args("bar")
+        self._test_playlist_value(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, "foo", "bar", False)
+        pl.set_closed()
+        self._test_playlist_value(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, "foo", "bar", True)
 
     def test_get_ingestable_playlist(self):
         list_count = 3

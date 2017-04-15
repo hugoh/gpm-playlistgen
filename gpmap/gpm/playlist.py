@@ -19,8 +19,8 @@ class Playlist:
     def get_name(self):
         return self.name
 
-    def set_type(self, type):
-        self.type = type
+    def set_type(self, playlist_type):
+        self.type = playlist_type
 
     def set_args(self, args):
         self.args = args
