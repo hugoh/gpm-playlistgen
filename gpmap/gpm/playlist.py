@@ -42,6 +42,11 @@ class Playlist:
     def add_track(self, track):
         self.tracks.append(track)
 
+    def inherit_attributes(self, other):
+        self.type = other.type
+        self.args = other.args
+        self.closed = other.closed
+
     def get_ingestable_playlists(self):
         it = iter(self.tracks)
         item = list(itertools.islice(it, Playlist.PLAYLIST_MAX))
@@ -52,6 +57,7 @@ class Playlist:
             if total_count > 1:
                 name += " (%d/%d)" % (n, total_count)
             pl = Playlist(name, self.generated)
+            pl.inherit_attributes(self)
             pl.tracks = item
             yield pl
             item = list(itertools.islice(it, Playlist.PLAYLIST_MAX))
