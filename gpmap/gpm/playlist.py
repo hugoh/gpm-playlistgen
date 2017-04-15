@@ -25,6 +25,9 @@ class Playlist:
     def set_args(self, args):
         self.args = args
 
+    def set_closed(self, value=True):
+        self.closed = value
+
     def get_description(self):
         description = {
             'version': Playlist.VERSION,

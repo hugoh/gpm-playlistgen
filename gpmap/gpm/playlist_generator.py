@@ -24,22 +24,32 @@ class PlaylistGenerator():
         else:
             return name
 
+    @staticmethod
+    def _gen_yearmonth(timestamp):
+        return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m')
+
+    @staticmethod
+    def _is_yearmonth_old(current, tested):
+        return tested < current
+
     def _gen_monthly_added(self, config):
-        songsByMonth = {}
+        songs_by_month = {}
+        current_yearmonth = self._gen_yearmonth(self.timestamp)
         for track in self.library_db.get_tracks("ORDER BY creationTimestamp, discNumber, trackNumber"):
             # Group by year & month
             created_time_ms = track.creationTimestamp
             created_time = created_time_ms / (10 ** 6)
-            created_yearmonth = datetime.datetime.fromtimestamp(created_time).strftime('%Y-%m')
-            if songsByMonth.has_key(created_yearmonth) == False:
+            created_yearmonth = self._gen_yearmonth(created_time)
+            if songs_by_month.has_key(created_yearmonth) == False:
                 pl = Playlist(self.full_playlist_name('Added in ' + created_yearmonth), self.timestamp)
                 pl.set_type(self.MONTHLY_ADDED)
                 pl.set_args(created_yearmonth)
-                songsByMonth[created_yearmonth] = pl
-            songsByMonth[created_yearmonth].add_track(track.id)
+                pl.set_closed(self._is_yearmonth_old(current_yearmonth, created_yearmonth))
+                songs_by_month[created_yearmonth] = pl
+            songs_by_month[created_yearmonth].add_track(track.id)
         ret = []
-        for m in sorted(songsByMonth.keys()):
-            pl = songsByMonth[m]
+        for m in sorted(songs_by_month.keys()):
+            pl = songs_by_month[m]
             for p in pl.get_ingestable_playlists():
                 ret.append(p)
         return ret
