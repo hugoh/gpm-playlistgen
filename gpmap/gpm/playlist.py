@@ -1,5 +1,6 @@
 import itertools
 import json
+import logging
 
 class Playlist:
     VERSION = 1
@@ -7,6 +8,7 @@ class Playlist:
     PLAYLIST_MAX = 1000
 
     def __init__(self, name, generated):
+        self.logger = logging.getLogger(__name__)
         self.name = name
         self.generated = generated
         self.tracks = []
@@ -53,3 +55,8 @@ class Playlist:
         except:
             return False
         return False
+
+    def create_in_gpm(self, client):
+        self.logger.info("Creating playlist " + self.get_name())
+        playlist_id = client.create_playlist(self.get_name(), description=self.get_description())
+        client.add_songs_to_playlist(playlist_id, self.tracks)
