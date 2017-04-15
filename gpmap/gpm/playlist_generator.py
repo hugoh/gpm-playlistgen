@@ -22,5 +22,5 @@ class PlaylistGenerator():
         for m in sorted(songsByMonth.keys()):
             pl = songsByMonth[m]
             for p in pl.get_ingestable_playlists():
-                ret.append(pl)
+                ret.append(p)
         return ret
