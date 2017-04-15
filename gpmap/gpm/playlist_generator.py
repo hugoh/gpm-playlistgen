@@ -3,6 +3,7 @@ import logging
 
 from .playlist import Playlist
 
+
 class PlaylistGenerator():
     MONTHLY_ADDED = 'monthly_added'
     MOST_PLAYED = 'most_played'
@@ -13,11 +14,11 @@ class PlaylistGenerator():
         self.timestamp = timestamp
         self.library_db = library_db
 
-    def generate(self, type, config):
-        gen_func = getattr(self, "_gen_" + type)
-        return gen_func(self, config)
+    def generate(self, playlist_type, config):
+        gen_func = getattr(self, "_gen_" + playlist_type)
+        return gen_func(config)
 
-    def gen_full_name(self, name):
+    def full_playlist_name(self, name):
         if self.playlist_prefix != None and len(self.playlist_prefix) > 0:
             return self.playlist_prefix + ' ' + name
         else:
@@ -31,7 +32,7 @@ class PlaylistGenerator():
             created_time = created_time_ms / (10 ** 6)
             created_yearmonth = datetime.datetime.fromtimestamp(created_time).strftime('%Y-%m')
             if songsByMonth.has_key(created_yearmonth) == False:
-                pl = Playlist(self.gen_full_name('Added in ' + created_yearmonth), self.timestamp)
+                pl = Playlist(self.full_playlist_name('Added in ' + created_yearmonth), self.timestamp)
                 pl.set_type(self.MONTHLY_ADDED)
                 pl.set_args(created_yearmonth)
                 songsByMonth[created_yearmonth] = pl
@@ -53,7 +54,7 @@ class PlaylistGenerator():
             include_playlists = config['include_playlists']
         if include_playlists == True:
             self.logger.warn("Playlists not supported yet for most played")
-        playlist = Playlist(self.gen_full_name('Most played'), self.timestamp)
+        playlist = Playlist(self.full_playlist_name('Most played'), self.timestamp)
         playlist.set_type(self.MOST_PLAYED)
         # FIXME: add recentTimestamp
         for track in self.library_db.get_tracks("ORDER BY playCount DESC LIMIT %d" % limit):

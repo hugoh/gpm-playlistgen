@@ -7,10 +7,10 @@ from .playlist_generator import PlaylistGenerator
 class TestPlaylistGenerator(TestCase):
     def test_gen_full_name(self):
         plg = PlaylistGenerator(None, None, None)
-        self.assertEqual(plg.gen_full_name('foo'), 'foo')
+        self.assertEqual(plg.full_playlist_name('foo'), 'foo')
         plg = PlaylistGenerator("", None, None)
-        self.assertEqual(plg.gen_full_name('foo'), 'foo')
+        self.assertEqual(plg.full_playlist_name('foo'), 'foo')
         plg = PlaylistGenerator("bar", None, None)
-        self.assertEqual(plg.gen_full_name('foo'), 'bar foo')
+        self.assertEqual(plg.full_playlist_name('foo'), 'bar foo')
         plg = PlaylistGenerator(u"…", None, None)
-        self.assertEqual(plg.gen_full_name('foo'),  u"… foo")
+        self.assertEqual(plg.full_playlist_name('foo'), u"… foo")

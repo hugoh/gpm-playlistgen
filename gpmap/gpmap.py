@@ -4,17 +4,19 @@ import pickle
 
 from gmusicapi import Mobileclient
 
+from clientmock import ClientMock
 from .db.library import LibraryDb
 from .gpm.playlist import Playlist
 from .gpm.playlist_generator import PlaylistGenerator
 
 class GPMAP:
 
-    def __init__(self, username, password, prefix='[GPMAP]', log_level=logging.ERROR, library_cache=None, db_cache=None, dry_run=False):
+    def __init__(self, username, password, prefix='[GPMAP]', log_level=logging.ERROR, library_cache=None, db_cache=None,
+                 force=False, dry_run=False):
         logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(__name__)
 
-        self.playlist_prefix = prefix
+        # Client
         self.client = Mobileclient(debug_logging=False)
         self.logger.info('Logging in %s' % username)
         self.client.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
@@ -22,21 +24,28 @@ class GPMAP:
             self.writer_client = ClientMock()
         else:
             self.writer_client = self.client
+
+        self.playlist_prefix = prefix
+
+        # Local store
         self.cache_file = library_cache
         self.library_db = LibraryDb(db_cache)
+
+        # Internal stuff
         self.timestamp = time.time()
+        self.force = force
         self.dry_run = dry_run
-        return
 
     def _get_all_songs(self):
         save_to_cache = False
+        library = None
         if self.cache_file != None:
             try:
                 self.logger.info("Using cache " + self.cache_file)
                 library = pickle.load(open(self.cache_file, "rb"))
                 self.logger.info("... done")
             except:
-                self.logger.error("Reading from cache failed - re-downloading")
+                self.logger.warn("Reading from cache failed - re-downloading")
         if library == None:
             library = self.client.get_all_songs(incremental=False)
             save_to_cache = True
@@ -77,14 +86,3 @@ class GPMAP:
             return
         for pl in playlists:
             pl.create_in_gpm(self.writer_client)
-
-class ClientMock():
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
-
-    def __getattr__(self, name):
-        self.logger.info("Not executing %s" % name)
-        return self.noop
-
-    def noop(self, *args, **kwargs):
-        return
