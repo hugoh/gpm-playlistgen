@@ -55,15 +55,14 @@ class Playlist:
             n += 1
 
     @staticmethod
-    def is_generated_by_gpmap(playlist_dict, prefix):
-        if len(prefix) == 0:
-            raise Exception('invalid prefix')
-        if not playlist_dict['name'].startswith(prefix):
-            return False
+    def is_generated_by_gpmap(playlist_dict):
         try:
             desc = json.loads(playlist_dict['description'])
-            if desc['version'] == Playlist.VERSION and desc['generatedby'] == Playlist.GENERATEDBY:
-                return True
+            if desc['generatedby'] == Playlist.GENERATEDBY:
+                if desc['version'] == Playlist.VERSION:
+                   return True
+                else:
+                    logging.warn("Unsupported version")
         except:
             return False
         return False

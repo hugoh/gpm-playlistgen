@@ -46,44 +46,30 @@ class TestPlaylist(TestCase):
         self.assertTrue(Playlist.is_generated_by_gpmap({
             'name': self.sample_playlist.get_name(),
             'description': self.sample_playlist.get_description()
-        }, self.PREFIX))
-
-        self.assertFalse(Playlist.is_generated_by_gpmap({
-            'name': self.sample_playlist.get_name(),
-            'description': self.sample_playlist.get_description()
-        }, "a"))
+        }))
 
         desc = json.loads(self.sample_playlist.get_description())
         desc['version'] = 2
         self.assertFalse(Playlist.is_generated_by_gpmap({
             'name': self.sample_playlist.get_name(),
             'description': json.dumps(desc)
-        }, self.PREFIX))
+        }))
 
         desc = json.loads(self.sample_playlist.get_description())
         del desc['version']
         self.assertFalse(Playlist.is_generated_by_gpmap({
             'name': self.sample_playlist.get_name(),
             'description': json.dumps(desc)
-        }, self.PREFIX))
+        }))
 
         desc = json.loads(self.sample_playlist.get_description())
         del desc['generatedby']
         self.assertFalse(Playlist.is_generated_by_gpmap({
             'name': self.sample_playlist.get_name(),
             'description': json.dumps(desc)
-        }, self.PREFIX))
+        }))
 
         self.assertFalse(Playlist.is_generated_by_gpmap({
             'name': self.sample_playlist.get_name(),
             'description': self.sample_playlist.get_description()[:-1]
-        }, self.PREFIX))
-
-        try:
-            Playlist.is_generated_by_gpmap({
-                'name': self.sample_playlist.get_name(),
-                'description': self.sample_playlist.get_description()[:-1]
-            }, '')
-            self.fail('exception not raised')
-        except:
-            pass
+        }))

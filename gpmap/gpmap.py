@@ -53,9 +53,9 @@ class GPMAP:
         library = self._get_all_songs()
         self.library_db.ingest(library)
 
-    def cleanup_previous_playlists(self):
+    def cleanup_all_generated_playlists(self):
         for pl in self.client.get_all_playlists():
-            if not Playlist.is_generated_by_gpmap(pl, self.playlist_prefix):
+            if not Playlist.is_generated_by_gpmap(pl):
                 self.logger.debug('Skipping %s: %s' % (pl['id'], pl['name']))
                 continue
             self.logger.info('Deleting %s: %s' % (pl['id'], pl['name']))
