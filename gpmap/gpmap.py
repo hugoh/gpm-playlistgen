@@ -51,7 +51,16 @@ class GPMAP:
             return
         # FIXME: also get playlist contents
         library = self._get_all_songs()
-        self.library_db.ingest(library)
+        self.library_db.ingest_library(library)
+
+    def _get_all_generated_playlists(self):
+        playlists = []
+        for pl in self.client.get_all_playlists():
+            if not Playlist.is_generated_by_gpmap(pl):
+                self.logger.debug('Skipping %s: %s' % (pl['id'], pl['name']))
+                continue
+            playlists.append(pl)
+        self.library_db.ingest_generated_playlists(playlists)
 
     def cleanup_all_generated_playlists(self):
         for pl in self.client.get_all_playlists():
