@@ -56,11 +56,16 @@ class GPMAP:
         return library
 
     def get_library(self):
+        # Get songs
         if self.library_db.is_initialized():
             return
-        # FIXME: also get playlist contents
         library = self._get_all_songs()
         self.library_db.ingest_library(library)
+
+        # Get generated playlists
+        self._get_all_generated_playlists()
+
+        # FIXME: also get playlist contents
 
     def _get_all_generated_playlists(self):
         playlists = []
@@ -72,7 +77,6 @@ class GPMAP:
         self.library_db.ingest_generated_playlists(playlists)
 
     def cleanup_all_generated_playlists(self):
-        self._get_all_generated_playlists()
         for pl in self.library_db.get_generated_playlists():
             self.logger.info('Deleting %s: %s' % (pl.id, pl.name))
             self.writer_client.delete_playlist(pl.id)
