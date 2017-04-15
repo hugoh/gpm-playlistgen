@@ -27,7 +27,7 @@ class PlaylistGenerator():
         songsByMonth = {}
         for track in self.library_db.get_tracks("ORDER BY creationTimestamp, discNumber, trackNumber"):
             # Group by year & month
-            created_time_ms = track.creation_timestamp
+            created_time_ms = track.creationTimestamp
             created_time = created_time_ms / (10 ** 6)
             created_yearmonth = datetime.datetime.fromtimestamp(created_time).strftime('%Y-%m')
             if songsByMonth.has_key(created_yearmonth) == False:
