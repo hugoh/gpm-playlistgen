@@ -76,17 +76,21 @@ class GPMAP:
             playlists.append(pl)
         self.library_db.ingest_generated_playlists(playlists)
 
-    def cleanup_all_generated_playlists(self):
-        for pl in self.library_db.get_generated_playlists():
+    def delete_playlists(self, playlists):
+        for pl in playlists:
             self.logger.info('Deleting %s: %s' % (pl.id, pl.name))
             self.writer_client.delete_playlist(pl.id)
+
+    def cleanup_all_generated_playlists(self):
+        self.delete_playlists(self.library_db.get_generated_playlists())
 
     def generate_playlist(self, type, config):
         generator = PlaylistGenerator(self.playlist_prefix, self.timestamp, self.library_db)
         try:
-            playlists = generator.generate(type, config)
+            generator_results = generator.generate(type, config)
         except AttributeError:
             self.logger.error('Method %s does not exist' % (type))
             return
-        for pl in playlists:
+        self.delete_playlists(generator_results.delete_playlists)
+        for pl in generator_results.new_playlists:
             pl.create_in_gpm(self.writer_client)

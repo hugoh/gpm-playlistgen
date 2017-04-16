@@ -1,4 +1,5 @@
 import json
+import logging
 
 from dbitem import *
 
@@ -28,3 +29,31 @@ class DbPlaylist(DbItem):
             self.closed = 1
         else:
             self.closed = 0
+
+
+class DbPlaylistCache():
+    final_cache = {}
+
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
+    def are_final_check(self, pl_type, pl_args):
+        key = "%s:%s" % (pl_type, pl_args)
+        if self.final_cache.has_key(key):
+            return self.final_cache[key]
+        return None
+
+    def are_final(self, pl_type, pl_args, playlists):
+        key = "%s:%s" % (pl_type, pl_args)
+        if self.final_cache.has_key(key):
+            return self.final_cache[key]
+        final = False
+        for p in playlists:
+            if p.closed != True:
+                final = False
+                break
+            else:
+                final = True
+        self.logger.info("Playlist for %s:%s final? " % (pl_type, pl_args) + str(final))
+        self.final_cache[key] = final
+        return final
