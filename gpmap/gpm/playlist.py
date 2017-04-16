@@ -14,16 +14,19 @@ class Playlist:
         self.tracks = []
         self.type = None
         self.args = None
-        self.closed = False
+        self.final = False
 
     def get_name(self):
         return self.name
 
-    def set_type(self, type):
-        self.type = type
+    def set_type(self, playlist_type):
+        self.type = playlist_type
 
     def set_args(self, args):
         self.args = args
+
+    def set_final(self, value=True):
+        self.final = value
 
     def get_description(self):
         description = {
@@ -32,12 +35,17 @@ class Playlist:
             'generated': self.generated,
             'type': self.type,
             'args': self.args,
-            'closed': self.closed
+            'final': self.final
         }
         return json.dumps(description)
 
     def add_track(self, track):
         self.tracks.append(track)
+
+    def inherit_attributes(self, other):
+        self.type = other.type
+        self.args = other.args
+        self.final = other.final
 
     def get_ingestable_playlists(self):
         it = iter(self.tracks)
@@ -49,6 +57,7 @@ class Playlist:
             if total_count > 1:
                 name += " (%d/%d)" % (n, total_count)
             pl = Playlist(name, self.generated)
+            pl.inherit_attributes(self)
             pl.tracks = item
             yield pl
             item = list(itertools.islice(it, Playlist.PLAYLIST_MAX))

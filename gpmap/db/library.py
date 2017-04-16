@@ -24,6 +24,7 @@ class LibraryDb:
         self.db_conn = sqlite3.connect(db)
 
     def __del__(self):
+        self.db_conn.commit()
         self.db_conn.close()
 
     def is_initialized(self):
@@ -71,4 +72,3 @@ class LibraryDb:
             db_playlist.from_db_row(row)
             playlists.append(db_playlist)
         return playlists
-

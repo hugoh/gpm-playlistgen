@@ -11,6 +11,7 @@ def build_argparser():
     parser.add_argument('config', type=file, help='Config file')
     parser.add_argument('--dry-run', action='store_true', help="Don't do any actual changes")
     parser.add_argument('--delete-all-playlists', action='store_true', help="Delete all generated playlists and exit immediately")
+    parser.add_argument('--force', action='store_true', help="Regenerate all playlists")
     return parser
 
 def get_cache_path(cfg, cache_type):
@@ -29,15 +30,18 @@ if __name__ == '__main__':
             debug_level = logging.DEBUG
     except:
         pass
-    cfg['dry-run'] = args.dry_run
 
     gpmap = GPMAP(cfg['auth']['user'], cfg['auth']['passwd'],
                   cfg['prefix'], debug_level,
                   library_cache=get_cache_path(cfg, 'libraryCache'),
-                  db_cache=get_cache_path(cfg, 'dbFile'), dry_run=cfg['dry-run'])
+                  db_cache=get_cache_path(cfg, 'dbFile'),
+                  force=args.force, dry_run=args.dry_run)
+    gpmap.get_library()
     if args.delete_all_playlists:
         gpmap.cleanup_all_generated_playlists()
         sys.exit(0)
-    gpmap.get_library()
+    i = 0
     for playlist in cfg['playlists'].keys():
+        i += 1
         gpmap.generate_playlist(playlist, cfg['playlists'][playlist])
+    logging.info("Generated %d auto playlists" % i)
