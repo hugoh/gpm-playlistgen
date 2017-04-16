@@ -41,16 +41,17 @@ class GPMAP:
         library = None
         if self.cache_file != None:
             try:
-                self.logger.info("Using cache " + self.cache_file)
+                self.logger.debug("Using cache " + self.cache_file)
                 library = pickle.load(open(self.cache_file, "rb"))
-                self.logger.info("... done")
+                self.logger.debug("... done")
             except:
                 self.logger.warn("Reading from cache failed - re-downloading")
         if library == None:
+            self.logger.info("Downloading all tracks from library")
             library = self.client.get_all_songs(incremental=False)
             save_to_cache = True
         if self.cache_file != None and save_to_cache == True:
-            self.logger.info("Saving to cache " + self.cache_file)
+            self.logger.debug("Saving to cache " + self.cache_file)
             pickle.dump(library, open(self.cache_file, "wb"))
         self.logger.info("Loaded %d songs" % (len(library)))
         return library

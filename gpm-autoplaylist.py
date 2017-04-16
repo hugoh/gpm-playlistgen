@@ -36,10 +36,10 @@ if __name__ == '__main__':
                   library_cache=get_cache_path(cfg, 'libraryCache'),
                   db_cache=get_cache_path(cfg, 'dbFile'),
                   force=args.force, dry_run=args.dry_run)
+    gpmap.get_library()
     if args.delete_all_playlists:
         gpmap.cleanup_all_generated_playlists()
         sys.exit(0)
-    gpmap.get_library()
     i = 0
     for playlist in cfg['playlists'].keys():
         i += 1
