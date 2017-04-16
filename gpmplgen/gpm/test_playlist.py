@@ -5,7 +5,7 @@ import json
 
 
 class TestPlaylist(TestCase):
-    PREFIX = "[GPMAP]"
+    PREFIX = "FOO"
     NAME = "%s foo" % PREFIX
     GEN = 123456
     TYPE = 'foo'
@@ -60,34 +60,34 @@ class TestPlaylist(TestCase):
             self.assertEqual(len(pl.tracks), l, "correct length")
         self.assertEqual(list_count, i, "correct number of playlists")
 
-    def test_generated_by_gpmap(self):
-        self.assertTrue(Playlist.is_generated_by_gpmap({
+    def test_generated_by_gpmplgen(self):
+        self.assertTrue(Playlist.is_generated_by_gpmplgen({
             'name': self.sample_playlist.get_name(),
             'description': self.sample_playlist.get_description()
         }))
 
         desc = json.loads(self.sample_playlist.get_description())
         desc['version'] = 2
-        self.assertFalse(Playlist.is_generated_by_gpmap({
+        self.assertFalse(Playlist.is_generated_by_gpmplgen({
             'name': self.sample_playlist.get_name(),
             'description': json.dumps(desc)
         }))
 
         desc = json.loads(self.sample_playlist.get_description())
         del desc['version']
-        self.assertFalse(Playlist.is_generated_by_gpmap({
+        self.assertFalse(Playlist.is_generated_by_gpmplgen({
             'name': self.sample_playlist.get_name(),
             'description': json.dumps(desc)
         }))
 
         desc = json.loads(self.sample_playlist.get_description())
         del desc['generatedby']
-        self.assertFalse(Playlist.is_generated_by_gpmap({
+        self.assertFalse(Playlist.is_generated_by_gpmplgen({
             'name': self.sample_playlist.get_name(),
             'description': json.dumps(desc)
         }))
 
-        self.assertFalse(Playlist.is_generated_by_gpmap({
+        self.assertFalse(Playlist.is_generated_by_gpmplgen({
             'name': self.sample_playlist.get_name(),
             'description': self.sample_playlist.get_description()[:-1]
         }))
