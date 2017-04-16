@@ -14,7 +14,7 @@ class Playlist:
         self.tracks = []
         self.type = None
         self.args = None
-        self.closed = False
+        self.final = False
 
     def get_name(self):
         return self.name
@@ -25,8 +25,8 @@ class Playlist:
     def set_args(self, args):
         self.args = args
 
-    def set_closed(self, value=True):
-        self.closed = value
+    def set_final(self, value=True):
+        self.final = value
 
     def get_description(self):
         description = {
@@ -35,7 +35,7 @@ class Playlist:
             'generated': self.generated,
             'type': self.type,
             'args': self.args,
-            'closed': self.closed
+            'final': self.final
         }
         return json.dumps(description)
 
@@ -45,7 +45,7 @@ class Playlist:
     def inherit_attributes(self, other):
         self.type = other.type
         self.args = other.args
-        self.closed = other.closed
+        self.final = other.final
 
     def get_ingestable_playlists(self):
         it = iter(self.tracks)

@@ -13,7 +13,7 @@ class DbPlaylist(DbItem):
             DbColumn('version', 'TEXT'),
             DbColumn('type', 'TEXT'),
             DbColumn('args', 'TEXT'),
-            DbColumn('closed', 'INTEGER'),
+            DbColumn('final', 'INTEGER'),
         ]
         DbItem.__init__(self, columns)
 
@@ -25,10 +25,10 @@ class DbPlaylist(DbItem):
         self.version = d.get('version', '')
         self.type = d.get('type', '')
         self.args = d.get('args', '')
-        if d.get('closed', False) == True:
-            self.closed = 1
+        if d.get('final', False) == True:
+            self.final = 1
         else:
-            self.closed = 0
+            self.final = 0
 
 
 class DbPlaylistCache():
@@ -49,7 +49,7 @@ class DbPlaylistCache():
             return self.final_cache[key]
         final = False
         for p in playlists:
-            if p.closed != True:
+            if p.final != True:
                 final = False
                 break
             else:

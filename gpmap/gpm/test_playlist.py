@@ -20,14 +20,14 @@ class TestPlaylist(TestCase):
     def test_name(self):
         self.assertEqual(self.NAME, self.sample_playlist.get_name())
 
-    def _test_playlist_description(self, playlist, version, generatedby, generated, playlist_type, args, closed):
+    def _test_playlist_description(self, playlist, version, generatedby, generated, playlist_type, args, final):
         obj = json.loads(playlist.get_description())
         self.assertEqual(obj['version'], version)
         self.assertEqual(obj['generatedby'], generatedby)
         self.assertEqual(obj['generated'], generated)
         self.assertEqual(obj['type'], playlist_type)
         self.assertEqual(obj['args'], args)
-        self.assertEqual(obj['closed'], closed)
+        self.assertEqual(obj['final'], final)
 
     def test_description(self):
         pl = self.sample_playlist
@@ -36,7 +36,7 @@ class TestPlaylist(TestCase):
         self._test_playlist_description(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, self.TYPE, None, False)
         pl.set_args(self.ARGS)
         self._test_playlist_description(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, self.TYPE, self.ARGS, False)
-        pl.set_closed()
+        pl.set_final()
         self._test_playlist_description(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, self.TYPE, self.ARGS, True)
 
     def test_get_ingestable_playlist(self):
@@ -48,7 +48,7 @@ class TestPlaylist(TestCase):
         i = 0
         self.sample_playlist.set_type(self.TYPE)
         self.sample_playlist.set_args(self.ARGS)
-        self.sample_playlist.set_closed()
+        self.sample_playlist.set_final()
         for pl in self.sample_playlist.get_ingestable_playlists():
             i += 1
             self.assertEqual("%s (%d/%d)" % (self.NAME, i, list_count), pl.get_name(), "correct name")

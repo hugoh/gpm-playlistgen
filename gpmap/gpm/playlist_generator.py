@@ -64,7 +64,7 @@ class PlaylistGenerator():
                 pl = Playlist(self.full_playlist_name('Added in ' + created_yearmonth), self.timestamp)
                 pl.set_type(pl_type)
                 pl.set_args(pl_args)
-                pl.set_closed(self._is_yearmonth_old(current_yearmonth, created_yearmonth))
+                pl.set_final(self._is_yearmonth_old(current_yearmonth, created_yearmonth))
                 songs_by_month[created_yearmonth] = pl
             songs_by_month[created_yearmonth].add_track(track.id)
         for m in sorted(songs_by_month.keys()):
