@@ -1,6 +1,6 @@
 # Google Play Music - Playlist Generator
 
-[![build status](https://gitlab.com/hugoh/gpm-autoplaylist/badges/master/build.svg)](https://gitlab.com/hugoh/gpm-autoplaylist/commits/master)
+[![build status](https://gitlab.com/hugoh/gpm-playlistgen/badges/master/build.svg)](https://gitlab.com/hugoh/gpm-playlistgen/commits/master)
 
 This is a command-line tool to generate a set of standard playlists for Google Play Music libraries.
 
