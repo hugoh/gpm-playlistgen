@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
 import argparse
-import logging
 import yaml
 import sys
-from gpmplgen.gpmplgen import GPMPlGen
+from gpmplgen import *
+import logging
 
 
 def build_argparser():
@@ -32,21 +32,26 @@ if __name__ == '__main__':
     try:
         if cfg['dev']['debug']:
             debug_level = logging.DEBUG
-    except:
+    except KeyError:
         pass
 
-    gpmplgen = GPMPlGen(cfg['auth']['user'], cfg['auth']['passwd'],
-                        cfg['prefix'], debug_level,
-                        library_cache=get_cache_path(cfg, 'libraryCache'),
-                        db_cache=get_cache_path(cfg, 'dbFile'),
-                        force=args.force, dry_run=args.dry_run)
-    if args.delete_all_playlists:
-        gpmplgen.get_library(get_songs=False)
-        gpmplgen.cleanup_all_generated_playlists()
-        sys.exit(0)
-    gpmplgen.get_library()
-    i = 0
-    for playlist in cfg['playlists'].keys():
-        i += 1
-        gpmplgen.generate_playlist(playlist, cfg['playlists'][playlist])
-    logging.info("Generated %d auto playlists" % i)
+    try:
+        gpmplgen = GPMPlGen(cfg['auth']['user'], cfg['auth']['passwd'],
+                            cfg['prefix'], debug_level,
+                            library_cache=get_cache_path(cfg, 'libraryCache'),
+                            db_cache=get_cache_path(cfg, 'dbFile'),
+                            force=args.force, dry_run=args.dry_run)
+        if args.delete_all_playlists:
+            gpmplgen.get_library(get_songs=False)
+            gpmplgen.cleanup_all_generated_playlists()
+            sys.exit(0)
+        gpmplgen.get_library()
+        i = 0
+        for playlist in cfg['playlists'].keys():
+            i += 1
+            gpmplgen.generate_playlist(playlist, cfg['playlists'][playlist])
+        logging.info("Generated %d auto playlists" % i)
+    except GPMPlGenException as e:
+        logging.fatal(e)
+        logging.fatal("Exiting...      :-(")
+        sys.exit(1)
