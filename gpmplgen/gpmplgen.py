@@ -14,7 +14,7 @@ class GPMPlGen:
 
     DEFAULT_PREFIX='[PG]'
 
-    def __init__(self, username, password, prefix=GPMPlGen.DEFAULT_PREFIX, log_level=logging.ERROR, library_cache=None, db_cache=None,
+    def __init__(self, username, password, prefix=DEFAULT_PREFIX, log_level=logging.ERROR, library_cache=None, db_cache=None,
                  force=False, dry_run=False):
         logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(__name__)
