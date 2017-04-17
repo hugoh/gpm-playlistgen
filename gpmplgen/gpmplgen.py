@@ -59,26 +59,34 @@ class GPMPlGen:
         self.logger.info("Loaded %d songs" % (len(library)))
         return library
 
-    def get_library(self):
-        # Get songs
+    def get_library(self, get_songs=True, get_playlists=True):
         if self.library_db.is_initialized():
             return
-        library = self._get_all_songs()
-        self.library_db.ingest_library(library)
+
+        # Get songs
+        if get_songs:
+            library = self._get_all_songs()
+            self.library_db.ingest_library(library)
+        else:
+            self.logger.info('Skipping getting songs')
 
         # Get generated playlists
-        self._get_all_generated_playlists()
-
-        # FIXME: also get playlist contents
+        if get_playlists:
+            playlists = self._get_all_generated_playlists()
+            self.library_db.ingest_generated_playlists(playlists)
+        else:
+            self.logger.info('Skipping getting playlists')
+            # FIXME: also get playlist contents?
 
     def _get_all_generated_playlists(self):
+        self.logger.info('Getting playlists')
         playlists = []
         for pl in self.client.get_all_playlists():
             if not Playlist.is_generated_by_gpmplgen(pl):
                 self.logger.debug('Skipping %s: %s' % (pl['id'], pl['name']))
                 continue
             playlists.append(pl)
-        self.library_db.ingest_generated_playlists(playlists)
+        return playlists
 
     def delete_playlists(self, playlists):
         for pl in playlists:
