@@ -37,6 +37,18 @@ The playlist generated will all have a name starting with "[PG]". This is config
 
 If you rerun the tool, it will only regenerate the playlists that are needed (new tracks in monthly added, and most played).
 
+## I need help
+
+Try:
+
+```sh
+python gpm-playlistgen.py config.yaml
+```
+
+## I want to report a problem or I have a cool idea for this tool
+ 
+Please use the [issue tracker](https://gitlab.com/hugoh/gpm-playlistgen/issues).
+
 ## FAQ
 
 ### I don't trust this tool
@@ -57,6 +69,6 @@ The description field is used to check that this is a generated list, but I stro
 python gpm-playlistgen.py --delete-all-playlists config.yaml --dry-run
 ```
 
-# Credits
+## Credits
 
 The heavy lifting is done thanks by [Simon Weber's gmusicapi](https://github.com/simon-weber/gmusicapi).
