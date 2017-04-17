@@ -9,9 +9,12 @@ from .db.library import LibraryDb
 from .gpm.playlist import Playlist
 from .gpm.playlist_generator import PlaylistGenerator
 
-class GPMAP:
 
-    def __init__(self, username, password, prefix='[GPMAP]', log_level=logging.ERROR, library_cache=None, db_cache=None,
+class GPMPlGen:
+
+    DEFAULT_PREFIX='[PG]'
+
+    def __init__(self, username, password, prefix=DEFAULT_PREFIX, log_level=logging.ERROR, library_cache=None, db_cache=None,
                  force=False, dry_run=False):
         logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(__name__)
@@ -71,7 +74,7 @@ class GPMAP:
     def _get_all_generated_playlists(self):
         playlists = []
         for pl in self.client.get_all_playlists():
-            if not Playlist.is_generated_by_gpmap(pl):
+            if not Playlist.is_generated_by_gpmplgen(pl):
                 self.logger.debug('Skipping %s: %s' % (pl['id'], pl['name']))
                 continue
             playlists.append(pl)

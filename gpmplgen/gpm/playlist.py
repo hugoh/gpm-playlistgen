@@ -4,7 +4,7 @@ import logging
 
 class Playlist:
     VERSION = 1
-    GENERATEDBY = 'GPMAP'
+    GENERATEDBY = 'GPMPlGen'
     PLAYLIST_MAX = 1000
 
     def __init__(self, name, generated):
@@ -64,7 +64,7 @@ class Playlist:
             n += 1
 
     @staticmethod
-    def is_generated_by_gpmap(playlist_dict):
+    def is_generated_by_gpmplgen(playlist_dict):
         try:
             desc = json.loads(playlist_dict['description'])
             if desc['generatedby'] == Playlist.GENERATEDBY:

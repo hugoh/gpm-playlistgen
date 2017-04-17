@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from .playlist import Playlist
-from gpmap.db.dbplaylist import DbPlaylistCache
+from gpmplgen.db.dbplaylist import DbPlaylistCache
 
 class PlaylistGeneratorResults():
     def __init__(self, delete_playlists, new_playlists):

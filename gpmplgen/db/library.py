@@ -2,7 +2,7 @@ import logging
 import os
 import sqlite3
 
-from gpmap.gpm.gpmitem import GPMItem
+from gpmplgen.gpm.gpmitem import GPMItem
 from dbtrack import DbTrack
 from dbplaylist import DbPlaylist
 

@@ -4,7 +4,7 @@ import argparse
 import logging
 import yaml
 import sys
-from gpmap.gpmap import GPMAP
+from gpmplgen.gpmplgen import GPMPlGen
 
 def build_argparser():
     parser = argparse.ArgumentParser(description='Create playlists automatically.')
@@ -31,17 +31,17 @@ if __name__ == '__main__':
     except:
         pass
 
-    gpmap = GPMAP(cfg['auth']['user'], cfg['auth']['passwd'],
-                  cfg['prefix'], debug_level,
-                  library_cache=get_cache_path(cfg, 'libraryCache'),
-                  db_cache=get_cache_path(cfg, 'dbFile'),
-                  force=args.force, dry_run=args.dry_run)
-    gpmap.get_library()
+    gpmplgen = GPMPlGen(cfg['auth']['user'], cfg['auth']['passwd'],
+                        cfg['prefix'], debug_level,
+                        library_cache=get_cache_path(cfg, 'libraryCache'),
+                        db_cache=get_cache_path(cfg, 'dbFile'),
+                        force=args.force, dry_run=args.dry_run)
+    gpmplgen.get_library()
     if args.delete_all_playlists:
-        gpmap.cleanup_all_generated_playlists()
+        gpmplgen.cleanup_all_generated_playlists()
         sys.exit(0)
     i = 0
     for playlist in cfg['playlists'].keys():
         i += 1
-        gpmap.generate_playlist(playlist, cfg['playlists'][playlist])
+        gpmplgen.generate_playlist(playlist, cfg['playlists'][playlist])
     logging.info("Generated %d auto playlists" % i)
