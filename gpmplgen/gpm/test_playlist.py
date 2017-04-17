@@ -51,7 +51,7 @@ class TestPlaylist(TestCase):
         self.sample_playlist.set_final()
         for pl in self.sample_playlist.get_ingestable_playlists():
             i += 1
-            self.assertEqual("%s (%d/%d)" % (self.NAME, i, list_count), pl.get_name(), "correct name")
+            self.assertEqual("%s (%d/%d)" % (self.NAME, i, list_count), pl.get_name, "correct name")
             self._test_playlist_description(pl, Playlist.VERSION, Playlist.GENERATEDBY, self.GEN, self.TYPE, self.ARGS, True)
             if (i != list_count):
                 l = Playlist.PLAYLIST_MAX

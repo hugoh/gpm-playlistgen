@@ -1,12 +1,13 @@
 import string
 
+
 class DbItem:
 
     def __init__(self, columns):
         self._columns = columns
 
     def get_columns(self):
-        names = map(lambda c: c.get_name(), self._columns)
+        names = map(lambda c: c.get_name, self._columns)
         return string.join(names, ',')
 
     def get_schema(self):
@@ -16,27 +17,29 @@ class DbItem:
     def from_db_row(self, row):
         i = 0
         for c in self._columns:
-            a = c.get_name()
+            a = c.get_name
             setattr(self, a, row[i])
             i += 1
 
     def to_sql_placeholder(self):
         placeholder = []
-        for c in self._columns:
+        for _ in self._columns:
             placeholder.append('?')
         return '(' + string.join(placeholder, ',') + ')'
 
     def values(self):
         values = ()
         for c in self._columns:
-            values = values + (getattr(self, c.get_name()),)
+            values = values + (getattr(self, c.get_name),)
         return values
 
-class DbColumn:
-    def __init__(self, name, type):
-        self.name = name
-        self.type = type
 
+class DbColumn:
+    def __init__(self, name, column_type):
+        self.name = name
+        self.type = column_type
+
+    @property
     def get_name(self):
         return self.name
 

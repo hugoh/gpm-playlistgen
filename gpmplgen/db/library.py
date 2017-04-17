@@ -2,9 +2,10 @@ import logging
 import os
 import sqlite3
 
+from . import *
+from gpmplgen.db import *
 from gpmplgen.gpm.gpmitem import GPMItem
-from dbtrack import DbTrack
-from dbplaylist import DbPlaylist
+
 
 class LibraryDb:
     LIBRARY_DB = 'library'

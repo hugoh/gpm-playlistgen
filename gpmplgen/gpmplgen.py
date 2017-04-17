@@ -6,8 +6,7 @@ from gmusicapi import Mobileclient
 
 from clientmock import ClientMock
 from .db.library import LibraryDb
-from .gpm.playlist import Playlist
-from .gpm.playlist_generator import PlaylistGenerator
+from gpm import *
 
 
 class GPMPlGen:
@@ -89,6 +88,7 @@ class GPMPlGen:
         return playlists
 
     def delete_playlists(self, playlists):
+        # FIXME: replace with playlist.delete
         for pl in playlists:
             self.logger.info('Deleting %s: %s' % (pl.id, pl.name))
             self.writer_client.delete_playlist(pl.id)
@@ -103,6 +103,24 @@ class GPMPlGen:
         except AttributeError:
             self.logger.error('Method %s does not exist' % (type))
             return
-        self.delete_playlists(generator_results.delete_playlists)
-        for pl in generator_results.new_playlists:
-            pl.create_in_gpm(self.writer_client)
+        self.delete_playlists(generator_results.get_playlists_to_delete())
+        playlists_to_create = generator_results.get_playlists_to_create()
+        try:
+            for pl in playlists_to_create:
+                pl.create_in_gpm(self.writer_client)
+        except GPMPlGenException as e:
+            self.logger.error("Error talking to Google Play Music; attempting to clean-up")
+            for pl in playlists_to_create:
+                pl.delete_in_gpm(self.writer_client)
+            self.logger.debug(e.parent_exception)
+            raise e # FIXME: maybe not?
+
+
+class GPMPlGenException(Exception):
+    def __init__(self, message, parent_exception):
+        self.message = message
+        self.parent_exception = parent_exception
+
+    def __str__(self):
+        logging.getLogger(__name__).debug(self.parent_exception)
+        return self.message
