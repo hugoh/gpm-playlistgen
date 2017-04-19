@@ -1,16 +1,24 @@
 import itertools
 import json
 import logging
+import time
+
+import gpmplgen
+
 
 class Playlist:
     VERSION = 1
     GENERATEDBY = 'GPMPlGen'
     PLAYLIST_MAX = 1000
 
-    def __init__(self, name, generated):
+    def __init__(self, name, generated_timestamp=None, id=None):
         self.logger = logging.getLogger(__name__)
         self.name = name
-        self.generated = generated
+        self.id = id
+        if generated_timestamp:
+            self.generated = generated_timestamp
+        else:
+            self.generated = time.time()
         self.tracks = []
         self.type = None
         self.args = None
@@ -78,5 +86,18 @@ class Playlist:
 
     def create_in_gpm(self, client):
         self.logger.info("Creating playlist " + self.get_name())
-        playlist_id = client.create_playlist(self.get_name(), description=self.get_description())
-        client.add_songs_to_playlist(playlist_id, self.tracks)
+        try:
+            self.id = client.create_playlist(self.get_name(), description=self.get_description())
+        except Exception as e:
+            raise gpmplgen.GPMPlGenException("Error creating playlists on Google Play Music", e)
+        try:
+            client.add_songs_to_playlist(self.id, self.tracks)
+        except Exception as e:
+            raise gpmplgen.GPMPlGenException("Error adding songs to playlist on Google Play Music", e)
+
+    def delete_in_gpm(self, client):
+        if self.id is None:
+            self.logger.debug('Not deleting non-existing playlist %s' % (self.name))
+            return
+        self.logger.info('Deleting %s: %s' % (self.id, self.name))
+        client.delete_playlist(self.id)

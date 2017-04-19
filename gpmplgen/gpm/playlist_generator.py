@@ -1,15 +1,23 @@
 import datetime
 import logging
 
-from .playlist import Playlist
-from gpmplgen.db.dbplaylist import DbPlaylistCache
+from . import *
+from gpmplgen.db import *
 
-class PlaylistGeneratorResults():
+
+class PlaylistGeneratorResults:
     def __init__(self, delete_playlists, new_playlists):
-        self.delete_playlists = delete_playlists
-        self.new_playlists = new_playlists
+        self._to_delete = delete_playlists
+        self._to_create = new_playlists
 
-class PlaylistGenerator():
+    def get_playlists_to_delete(self):
+        return self._to_delete
+
+    def get_playlists_to_create(self):
+        return self._to_create
+
+
+class PlaylistGenerator:
     MONTHLY_ADDED = 'monthly_added'
     MOST_PLAYED = 'most_played'
 
@@ -24,7 +32,7 @@ class PlaylistGenerator():
         return gen_func(config)
 
     def full_playlist_name(self, name):
-        if self.playlist_prefix != None and len(self.playlist_prefix) > 0:
+        if self.playlist_prefix is not None and len(self.playlist_prefix) > 0:
             return self.playlist_prefix + ' ' + name
         else:
             return name
@@ -51,16 +59,17 @@ class PlaylistGenerator():
             pl_type = self.MONTHLY_ADDED
             pl_args = created_yearmonth
             current_playlists_final = dbplaylist_cache.are_final_check(pl_type, pl_args)
-            if current_playlists_final == None:
-                existing_playlists = self.library_db.get_generated_playlists("WHERE type='%s' AND args='%s'" % (pl_type, pl_args))
+            if current_playlists_final is None:
+                existing_playlists = \
+                    self.library_db.get_generated_playlists("WHERE type='%s' AND args='%s'" % (pl_type, pl_args))
                 current_playlists_final = dbplaylist_cache.are_final(pl_type, pl_args, existing_playlists)
-                if current_playlists_final == False:
+                if not current_playlists_final:
                     delete_playlists += existing_playlists
                 else:
                     self.logger.info('Skipping %s:%s' % (pl_type, pl_args))
-            if current_playlists_final == True:
+            if current_playlists_final:
                 continue
-            if songs_by_month.has_key(created_yearmonth) == False:
+            if not created_yearmonth in songs_by_month:
                 pl = Playlist(self.full_playlist_name('Added in ' + created_yearmonth), self.timestamp)
                 pl.set_type(pl_type)
                 pl.set_args(pl_args)
@@ -82,7 +91,7 @@ class PlaylistGenerator():
         delete_playlists = self.library_db.get_generated_playlists("WHERE type='%s'" % (self.MOST_PLAYED))
         if config.has_key('include_playlists'):
             include_playlists = config['include_playlists']
-        if include_playlists == True:
+        if include_playlists:
             self.logger.warn("Playlists not supported yet for most played")
         playlist = Playlist(self.full_playlist_name('Most played'), self.timestamp)
         playlist.set_type(self.MOST_PLAYED)

@@ -6,15 +6,14 @@ from gmusicapi import Mobileclient
 
 from clientmock import ClientMock
 from .db.library import LibraryDb
-from .gpm.playlist import Playlist
-from .gpm.playlist_generator import PlaylistGenerator
+from gpm import *
 
 
 class GPMPlGen:
+    DEFAULT_PREFIX = '[PG]'
 
-    DEFAULT_PREFIX='[PG]'
-
-    def __init__(self, username, password, prefix=DEFAULT_PREFIX, log_level=logging.ERROR, library_cache=None, db_cache=None,
+    def __init__(self, username, password, prefix=DEFAULT_PREFIX, log_level=logging.ERROR, library_cache=None,
+                 db_cache=None,
                  force=False, dry_run=False):
         logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(__name__)
@@ -22,8 +21,11 @@ class GPMPlGen:
         # Client
         self.client = Mobileclient(debug_logging=False)
         self.logger.info('Logging in %s' % username)
-        self.client.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
-        if dry_run == True:
+        try:
+            self.client.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
+        except Exception as e:
+            raise GPMPlGenException("Could not log in", e)
+        if dry_run:
             self.writer_client = ClientMock()
         else:
             self.writer_client = self.client
@@ -40,24 +42,28 @@ class GPMPlGen:
         self.dry_run = dry_run
 
     def _get_all_songs(self):
+        # FIXME: this is ugly; separate cache stuff out
         save_to_cache = False
-        library = None
-        if self.cache_file != None:
+        library_from_gpm = None
+        if self.cache_file is not None:
             try:
                 self.logger.debug("Using cache " + self.cache_file)
-                library = pickle.load(open(self.cache_file, "rb"))
+                library_from_gpm = pickle.load(open(self.cache_file, "rb"))
                 self.logger.debug("... done")
-            except:
+            except pickle.PickleError:
                 self.logger.warn("Reading from cache failed - re-downloading")
-        if library == None:
+        if library_from_gpm is None:
             self.logger.info("Downloading all tracks from library")
-            library = self.client.get_all_songs(incremental=False)
+            try:
+                library_from_gpm = self.client.get_all_songs(incremental=False)
+            except Exception as e:
+                GPMPlGenException("Could not download library", e)
             save_to_cache = True
-        if self.cache_file != None and save_to_cache == True:
+        if self.cache_file is not None and save_to_cache:
             self.logger.debug("Saving to cache " + self.cache_file)
-            pickle.dump(library, open(self.cache_file, "wb"))
-        self.logger.info("Loaded %d songs" % (len(library)))
-        return library
+            pickle.dump(library_from_gpm, open(self.cache_file, "wb"))
+        self.logger.info("Loaded %d songs" % (len(library_from_gpm)))
+        return library_from_gpm
 
     def get_library(self, get_songs=True, get_playlists=True):
         if self.library_db.is_initialized():
@@ -65,8 +71,8 @@ class GPMPlGen:
 
         # Get songs
         if get_songs:
-            library = self._get_all_songs()
-            self.library_db.ingest_library(library)
+            library_from_gpm = self._get_all_songs()
+            self.library_db.ingest_library(library_from_gpm)
         else:
             self.logger.info('Skipping getting songs')
 
@@ -80,15 +86,21 @@ class GPMPlGen:
 
     def _get_all_generated_playlists(self):
         self.logger.info('Getting playlists')
-        playlists = []
-        for pl in self.client.get_all_playlists():
+        playlists_from_gpm = []
+        try:
+            playlists_from_gpm = self.client.get_all_playlists()
+        except Exception as e:
+            GPMPlGenException("Could not download playlists", e)
+        generated_playlists = []
+        for pl in playlists_from_gpm:
             if not Playlist.is_generated_by_gpmplgen(pl):
                 self.logger.debug('Skipping %s: %s' % (pl['id'], pl['name']))
                 continue
-            playlists.append(pl)
-        return playlists
+            generated_playlists.append(pl)
+        return generated_playlists
 
     def delete_playlists(self, playlists):
+        # FIXME: replace with playlist.delete
         for pl in playlists:
             self.logger.info('Deleting %s: %s' % (pl.id, pl.name))
             self.writer_client.delete_playlist(pl.id)
@@ -96,13 +108,31 @@ class GPMPlGen:
     def cleanup_all_generated_playlists(self):
         self.delete_playlists(self.library_db.get_generated_playlists())
 
-    def generate_playlist(self, type, config):
+    def generate_playlist(self, playlist_type, config):
         generator = PlaylistGenerator(self.playlist_prefix, self.timestamp, self.library_db)
         try:
-            generator_results = generator.generate(type, config)
+            generator_results = generator.generate(playlist_type, config)
         except AttributeError:
-            self.logger.error('Method %s does not exist' % (type))
+            self.logger.error('Method %s does not exist' % playlist_type)
             return
-        self.delete_playlists(generator_results.delete_playlists)
-        for pl in generator_results.new_playlists:
-            pl.create_in_gpm(self.writer_client)
+        self.delete_playlists(generator_results.get_playlists_to_delete())
+        playlists_to_create = generator_results.get_playlists_to_create()
+        try:
+            for pl in playlists_to_create:
+                pl.create_in_gpm(self.writer_client)
+        except GPMPlGenException as e:
+            self.logger.error("Error talking to Google Play Music; attempting to clean-up")
+            for pl in playlists_to_create:
+                pl.delete_in_gpm(self.writer_client)
+            self.logger.debug(e.parent_exception)
+            raise e  # FIXME: maybe not?
+
+
+class GPMPlGenException(Exception):
+    def __init__(self, message, parent_exception):
+        self.message = message
+        self.parent_exception = parent_exception
+
+    def __str__(self):
+        logging.getLogger(__name__).debug(self.parent_exception)
+        return self.message

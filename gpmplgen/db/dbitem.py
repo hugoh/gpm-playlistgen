@@ -1,5 +1,6 @@
 import string
 
+
 class DbItem:
 
     def __init__(self, columns):
@@ -22,7 +23,7 @@ class DbItem:
 
     def to_sql_placeholder(self):
         placeholder = []
-        for c in self._columns:
+        for _ in self._columns:
             placeholder.append('?')
         return '(' + string.join(placeholder, ',') + ')'
 
@@ -32,10 +33,11 @@ class DbItem:
             values = values + (getattr(self, c.get_name()),)
         return values
 
+
 class DbColumn:
-    def __init__(self, name, type):
+    def __init__(self, name, column_type):
         self.name = name
-        self.type = type
+        self.type = column_type
 
     def get_name(self):
         return self.name
