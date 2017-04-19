@@ -1,6 +1,5 @@
 import time
 import logging
-import pickle
 
 from gmusicapi import Mobileclient
 
@@ -36,54 +35,52 @@ class GPMPlGen:
         else:
             self.writer_client = self.client
 
-        # Local store
-        self.library_db = LibraryDb(config.db_cache)
+        # Local database
+        self.db = LibraryDb(config.local_db)
 
         # Internal stuff
         self.timestamp = time.time()
 
     def _get_all_songs(self):
-        # FIXME: this is ugly; separate cache stuff out
-        save_to_cache = False
-        library_from_gpm = None
-        if self.config.library_cache is not None:
-            try:
-                self.logger.debug("Using cache " + self.config.library_cache)
-                library_from_gpm = pickle.load(open(self.config.library_cache, "rb"))
-                self.logger.debug("... done")
-            except pickle.PickleError:
-                self.logger.warn("Reading from cache failed - re-downloading")
-        if library_from_gpm is None:
-            self.logger.info("Downloading all tracks from library")
-            try:
-                library_from_gpm = self.client.get_all_songs(incremental=False)
-            except Exception as e:
-                GPMPlGenException("Could not download library", e)
-            save_to_cache = True
-        if self.config.library_cache is not None and save_to_cache:
-            self.logger.debug("Saving to cache " + self.config.library_cache)
-            pickle.dump(library_from_gpm, open(self.config.library_cache, "wb"))
+        self.logger.info("Downloading all tracks from library")
+        try:
+            library_from_gpm = self.client.get_all_songs(incremental=False)
+        except Exception as e:
+            GPMPlGenException("Could not download library", e)
         self.logger.info("Loaded %d songs" % (len(library_from_gpm)))
         return library_from_gpm
 
-    def get_library(self, get_songs=True, get_playlists=True):
-        if self.library_db.is_initialized():
+    def store_songs_in_db(self):
+        library_from_gpm = self._get_all_songs()
+        self.db.ingest_library(library_from_gpm)
+
+    def store_playlists_in_db(self):
+        self.logger.info("Downloading all generated playlists from library")
+        generated_playlists = self._get_all_generated_playlists()
+        self.logger.info("Loaded %d playlists" % (len(generated_playlists)))
+        self.db.ingest_generated_playlists(generated_playlists)
+
+    def retrieve_library(self, get_songs=True, get_playlists=True):
+        if self.db.cache_mode:
+            if self.config.write_to_db:
+                self.logger.info("Storing into cache")
+                self.store_songs_in_db()
+                self.store_playlists_in_db()
+            else:
+                self.logger.info("Using cache")
             return
 
         # Get songs
         if get_songs:
-            library_from_gpm = self._get_all_songs()
-            self.library_db.ingest_library(library_from_gpm)
+            self.store_songs_in_db()
         else:
             self.logger.info('Skipping getting songs')
 
         # Get generated playlists
         if get_playlists:
-            playlists = self._get_all_generated_playlists()
-            self.library_db.ingest_generated_playlists(playlists)
+            self.store_playlists_in_db()
         else:
             self.logger.info('Skipping getting playlists')
-            # FIXME: also get playlist contents?
 
     def _get_all_generated_playlists(self):
         self.logger.info('Getting playlists')
@@ -107,12 +104,12 @@ class GPMPlGen:
             self.writer_client.delete_playlist(pl.id)
 
     def cleanup_all_generated_playlists(self):
-        self.delete_playlists(self.library_db.get_generated_playlists())
+        self.delete_playlists(self.db.get_generated_playlists())
 
-    def generate_playlist(self, playlist_type, config):
-        generator = PlaylistGenerator(self.config.playlist_prefix, self.timestamp, self.library_db)
+    def generate_playlist(self, playlist_type, playlistConfig):
+        generator = PlaylistGenerator(self.config.playlist_prefix, self.timestamp, self.db)
         try:
-            generator_results = generator.generate(playlist_type, config)
+            generator_results = generator.generate(playlist_type, playlistConfig)
         except AttributeError:
             self.logger.error('Method %s does not exist' % playlist_type)
             return

@@ -1,6 +1,6 @@
 import yaml
 import logging
-
+import sys
 
 class Config:
     DEFAULT_PREFIX = '[PG]'
@@ -16,6 +16,7 @@ class Config:
         self.dry_run = False
         self.delete_all_playlists = False
         self.playlists = []
+        self.dev_db_operation = None
 
     def fromYaml(self, path):
         cfg = yaml.load(path)
@@ -23,22 +24,15 @@ class Config:
         self.password = cfg['auth']['passwd']
         self.playlist_prefix = cfg['prefix']
         self.playlists = cfg['playlists']
-        self.library_cache = Config._get_cache_path(cfg, 'libraryCache')
-        self.db_cache = Config._get_cache_path(cfg, 'dbFile')
-        try:
-            if cfg['dev']['debug']:
-                self.log_level = logging.DEBUG
-        except KeyError:
-            pass
 
     def fromCli(self, args):
         self.force = args.force
         self.dry_run = args.dry_run
         self.delete_all_playlists = args.delete_all_playlists
-
-    @staticmethod
-    def _get_cache_path(cfg, cache_type):
-        try:
-            return cfg['dev'][cache_type]
-        except KeyError:
-            return None
+        if args.write_to_db and args.db_path is None:
+            logging.fatal('Invalid --write-to-db use without a --db-path')
+            sys.exit(1)
+        self.local_db = args.db_path
+        self.write_to_db = args.write_to_db
+        if args.debug:
+            self.log_level = logging.DEBUG

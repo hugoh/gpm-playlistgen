@@ -14,31 +14,32 @@ class LibraryDb:
     def __init__(self, db_filename=None):
         self.logger = logging.getLogger(__name__)
 
-        self.initialized = False
-        if db_filename != None:
-            if os.path.isfile(db_filename):
-                self.initialized = True
+        if db_filename is not None:
             db = db_filename
+            self.cache_mode = True
+            self.logger.debug("Using %s as DB" % db)
         else:
-            db = ':memory:'
-        self.logger.debug("Using %s as db (initialized? %s)" % (db, self.initialized))
+            db = ':memory:'  # In-memory
+            self.cache_mode = False
         self.db_conn = sqlite3.connect(db)
 
     def __del__(self):
         self.db_conn.commit()
         self.db_conn.close()
 
-    def is_initialized(self):
-        return self.initialized
-
-    def ingest_library(self, library):
+    def ingest_library(self, gpmLibrary):
         cursor = self.db_conn.cursor()
+        try:
+            cursor.execute("DROP TABLE %s" % self.LIBRARY_DB)
+        except sqlite3.OperationalError:
+            pass
         cursor.execute("CREATE TABLE %s %s" % (self.LIBRARY_DB, DbTrack().get_schema()))
-        for track in library:
+        for track in gpmLibrary:
             t = GPMItem(track)
             db_track = DbTrack()
             db_track.from_track(t)
-            cursor.execute("INSERT INTO %s VALUES %s" % (self.LIBRARY_DB, db_track.to_sql_placeholder()), db_track.values())
+            cursor.execute("INSERT INTO %s VALUES %s" % (self.LIBRARY_DB, db_track.to_sql_placeholder()),
+                           db_track.values())
         self.db_conn.commit()
         self.initialized = True
 
@@ -53,7 +54,8 @@ class LibraryDb:
             p = GPMItem(pl)
             db_playlist = DbPlaylist()
             db_playlist.from_playlist(p)
-            cursor.execute('INSERT INTO %s VALUES %s' % (self.GENERATED_PL_DB, db_playlist.to_sql_placeholder()), db_playlist.values())
+            cursor.execute('INSERT INTO %s VALUES %s' % (self.GENERATED_PL_DB, db_playlist.to_sql_placeholder()),
+                           db_playlist.values())
         self.db_conn.commit()
 
     def get_tracks(self, query=''):
