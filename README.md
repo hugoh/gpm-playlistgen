@@ -71,4 +71,4 @@ python gpm-playlistgen.py --delete-all-playlists config.yaml --dry-run
 
 ## Credits
 
-The heavy lifting is done thanks by [Simon Weber's gmusicapi](https://github.com/simon-weber/gmusicapi).
+The heavy lifting is done by [Simon Weber's gmusicapi](https://github.com/simon-weber/gmusicapi).
