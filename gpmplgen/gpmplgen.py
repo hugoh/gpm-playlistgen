@@ -10,45 +10,46 @@ from gpm import *
 
 
 class GPMPlGen:
-    DEFAULT_PREFIX = '[PG]'
 
-    def __init__(self, username, password, prefix=DEFAULT_PREFIX, log_level=logging.ERROR, library_cache=None,
-                 db_cache=None,
-                 force=False, dry_run=False):
-        logging.basicConfig(level=log_level)
+    def __init__(self, config):
+        self.config = config
+        
+        logging.basicConfig(level=config.log_level)
         self.logger = logging.getLogger(__name__)
 
         # Client
         self.client = Mobileclient(debug_logging=False)
-        self.logger.info('Logging in %s' % username)
+        gmusicapi_logger = logging.getLogger('gmusicapi.utils')
+        gmusicapi_logger.setLevel(logging.INFO)
+
+        # Logging in
+        self.logger.info('Logging in %s' % config.username)
         try:
-            self.client.login(username, password, Mobileclient.FROM_MAC_ADDRESS)
+            self.client.login(config.username, config.password, Mobileclient.FROM_MAC_ADDRESS)
         except Exception as e:
             raise GPMPlGenException("Could not log in", e)
-        if dry_run:
+
+        # Setting up writer
+        if config.dry_run:
+            self.logger.info('Running in DRY-RUN mode; setting up mock client...')
             self.writer_client = ClientMock()
         else:
             self.writer_client = self.client
 
-        self.playlist_prefix = prefix
-
         # Local store
-        self.cache_file = library_cache
-        self.library_db = LibraryDb(db_cache)
+        self.library_db = LibraryDb(config.db_cache)
 
         # Internal stuff
         self.timestamp = time.time()
-        self.force = force
-        self.dry_run = dry_run
 
     def _get_all_songs(self):
         # FIXME: this is ugly; separate cache stuff out
         save_to_cache = False
         library_from_gpm = None
-        if self.cache_file is not None:
+        if self.config.library_cache is not None:
             try:
-                self.logger.debug("Using cache " + self.cache_file)
-                library_from_gpm = pickle.load(open(self.cache_file, "rb"))
+                self.logger.debug("Using cache " + self.config.library_cache)
+                library_from_gpm = pickle.load(open(self.config.library_cache, "rb"))
                 self.logger.debug("... done")
             except pickle.PickleError:
                 self.logger.warn("Reading from cache failed - re-downloading")
@@ -59,9 +60,9 @@ class GPMPlGen:
             except Exception as e:
                 GPMPlGenException("Could not download library", e)
             save_to_cache = True
-        if self.cache_file is not None and save_to_cache:
-            self.logger.debug("Saving to cache " + self.cache_file)
-            pickle.dump(library_from_gpm, open(self.cache_file, "wb"))
+        if self.config.library_cache is not None and save_to_cache:
+            self.logger.debug("Saving to cache " + self.config.library_cache)
+            pickle.dump(library_from_gpm, open(self.config.library_cache, "wb"))
         self.logger.info("Loaded %d songs" % (len(library_from_gpm)))
         return library_from_gpm
 
@@ -109,7 +110,7 @@ class GPMPlGen:
         self.delete_playlists(self.library_db.get_generated_playlists())
 
     def generate_playlist(self, playlist_type, config):
-        generator = PlaylistGenerator(self.playlist_prefix, self.timestamp, self.library_db)
+        generator = PlaylistGenerator(self.config.playlist_prefix, self.timestamp, self.library_db)
         try:
             generator_results = generator.generate(playlist_type, config)
         except AttributeError:
