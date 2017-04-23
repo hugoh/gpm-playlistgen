@@ -9,6 +9,7 @@ from gpmplgen.gpm.gpmitem import GPMItem
 
 class LibraryDb:
     LIBRARY_DB = 'library'
+    STATIC_PL_DB = 'static_playlists'
     GENERATED_PL_DB = 'generated_playlists'
 
     def __init__(self, db_filename=None):
@@ -27,18 +28,18 @@ class LibraryDb:
         self.db_conn.commit()
         self.db_conn.close()
 
-    def ingest_library(self, gpmLibrary):
+    def ingest_library(self, gpmLibrary, table):
         cursor = self.db_conn.cursor()
         try:
-            cursor.execute("DROP TABLE %s" % self.LIBRARY_DB)
+            cursor.execute("DROP TABLE %s" % table)
         except sqlite3.OperationalError:
             pass
-        cursor.execute("CREATE TABLE %s %s" % (self.LIBRARY_DB, DbTrack().get_schema()))
+        cursor.execute("CREATE TABLE %s %s" % (table, DbTrack().get_schema()))
         for track in gpmLibrary:
             t = GPMItem(track)
             db_track = DbTrack()
             db_track.from_track(t)
-            cursor.execute("INSERT INTO %s VALUES %s" % (self.LIBRARY_DB, db_track.to_sql_placeholder()),
+            cursor.execute("INSERT INTO %s VALUES %s" % (table, db_track.to_sql_placeholder()),
                            db_track.values())
         self.db_conn.commit()
         self.initialized = True

@@ -9,10 +9,9 @@ from gpm import *
 
 
 class GPMPlGen:
-
     def __init__(self, config):
         self.config = config
-        
+
         logging.basicConfig(level=config.log_level)
         self.logger = logging.getLogger(__name__)
 
@@ -50,15 +49,34 @@ class GPMPlGen:
         self.logger.info("Loaded %d songs" % (len(library_from_gpm)))
         return library_from_gpm
 
+    def _get_all_playlists_songs(self, static_playlists):
+        self.logger.info("Downloading all tracks from playlists")
+        try:
+            songs_from_playlists_from_gpm = self.client.get_all_user_playlist_contents()
+            self.logger.info("Loaded %d songs" % (len(songs_from_playlists_from_gpm)))
+        except Exception as e:
+            GPMPlGenException("Could not download playlist contents", e)
+        songs_from_static_playlists = []
+        for t in songs_from_playlists_from_gpm:
+            if t['playlistId'] in static_playlists:
+                songs_from_static_playlists.append(t)
+        self.logger.info("Loaded %d songs" % (len(songs_from_static_playlists)))
+        return songs_from_static_playlists
+
     def store_songs_in_db(self):
         library_from_gpm = self._get_all_songs()
-        self.db.ingest_library(library_from_gpm)
+        self.db.ingest_library(library_from_gpm, LibraryDb.LIBRARY_DB)
 
     def store_playlists_in_db(self):
         self.logger.info("Downloading all generated playlists from library")
-        generated_playlists = self._get_all_generated_playlists()
-        self.logger.info("Loaded %d playlists" % (len(generated_playlists)))
+        (generated_playlists, other_playlists) = self._get_all_playlists()
+        self.logger.info("Loading %d generated playlists"
+                         % (len(other_playlists)))
         self.db.ingest_generated_playlists(generated_playlists)
+        self.logger.info("Loading %d static playlists"
+                         % (len(other_playlists)))
+        tracks = self._get_all_playlists_songs(other_playlists)
+        self.db.ingest_library(tracks, LibraryDb.STATIC_PL_DB)
 
     def retrieve_library(self, get_songs=True, get_playlists=True):
         if self.db.cache_mode:
@@ -82,7 +100,7 @@ class GPMPlGen:
         else:
             self.logger.info('Skipping getting playlists')
 
-    def _get_all_generated_playlists(self):
+    def _get_all_playlists(self):
         self.logger.info('Getting playlists')
         playlists_from_gpm = []
         try:
@@ -90,12 +108,13 @@ class GPMPlGen:
         except Exception as e:
             GPMPlGenException("Could not download playlists", e)
         generated_playlists = []
+        static_playlists = []
         for pl in playlists_from_gpm:
-            if not Playlist.is_generated_by_gpmplgen(pl):
-                self.logger.debug('Skipping %s: %s' % (pl['id'], pl['name']))
-                continue
-            generated_playlists.append(pl)
-        return generated_playlists
+            if Playlist.is_generated_by_gpmplgen(pl):
+                generated_playlists.append(pl)
+            else:
+                static_playlists.append(pl)
+        return (generated_playlists, static_playlists)
 
     def delete_playlists(self, playlists):
         # FIXME: replace with playlist.delete
