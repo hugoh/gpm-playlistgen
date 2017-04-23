@@ -9,7 +9,3 @@ playlists:
         # Ordered list of tracks most played
         include_playlists: true # Include tracks in playlists in addition to library
         #limit: 1000 # Default is top 1000; it's also the max
-# dev:
-#     debug: true
-#     libraryCache: library.pickle
-#     dbFile: library.db

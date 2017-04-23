@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import argparse
-import yaml
 import sys
 from gpmplgen import *
 import logging
@@ -13,43 +12,34 @@ def build_argparser():
     parser.add_argument('--dry-run', action='store_true', help="Don't do any actual changes")
     parser.add_argument('--delete-all-playlists', action='store_true',
                         help="Delete all generated playlists and exit immediately")
-    parser.add_argument('--force', action='store_true', help="Regenerate all playlists")
+    parser.add_argument('--force', action='store_true', help="Regenerate all playlists")  # TODO: not implemented
+    parser.add_argument('--db-path', action='store', help='local DB file (usually used for debugging)')
+    parser.add_argument('--write-to-db', action='store_true', help='store GPM data in specified DB file and exit')
+    parser.add_argument('--debug', action='store_true', help='log debug information')
     return parser
-
-
-def get_cache_path(cfg, cache_type):
-    try:
-        return cfg['dev'][cache_type]
-    except KeyError:
-        return None
 
 
 if __name__ == '__main__':
     argparser = build_argparser()
     args = argparser.parse_args()
-    cfg = yaml.load(args.config)
-    debug_level = logging.INFO
-    try:
-        if cfg['dev']['debug']:
-            debug_level = logging.DEBUG
-    except KeyError:
-        pass
+
+    cfg = Config()
+    cfg.fromYaml(args.config)
+    cfg.fromCli(args)
 
     try:
-        gpmplgen = GPMPlGen(cfg['auth']['user'], cfg['auth']['passwd'],
-                            cfg['prefix'], debug_level,
-                            library_cache=get_cache_path(cfg, 'libraryCache'),
-                            db_cache=get_cache_path(cfg, 'dbFile'),
-                            force=args.force, dry_run=args.dry_run)
-        if args.delete_all_playlists:
-            gpmplgen.get_library(get_songs=False)
+        gpmplgen = GPMPlGen(cfg)
+        if cfg.delete_all_playlists:
+            gpmplgen.retrieve_library(get_songs=False)
             gpmplgen.cleanup_all_generated_playlists()
             sys.exit(0)
-        gpmplgen.get_library()
+        gpmplgen.retrieve_library()
+        if cfg.write_to_db:
+            sys.exit(0)
         i = 0
-        for playlist in cfg['playlists'].keys():
+        for playlist in cfg.playlists.keys():
             i += 1
-            gpmplgen.generate_playlist(playlist, cfg['playlists'][playlist])
+            gpmplgen.generate_playlist(playlist, cfg.playlists[playlist])
         logging.info("Generated %d auto playlists" % i)
     except GPMPlGenException as e:
         logging.fatal(e)
