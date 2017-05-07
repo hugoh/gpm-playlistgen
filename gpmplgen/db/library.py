@@ -28,14 +28,14 @@ class LibraryDb:
         self.db_conn.commit()
         self.db_conn.close()
 
-    def ingest_library(self, gpmLibrary, table):
+    def ingest_track_list(self, track_list, table):
         cursor = self.db_conn.cursor()
         try:
             cursor.execute("DROP TABLE %s" % table)
         except sqlite3.OperationalError:
             pass
         cursor.execute("CREATE TABLE %s %s" % (table, DbTrack().get_schema()))
-        for track in gpmLibrary:
+        for track in track_list:
             t = GPMItem(track)
             db_track = DbTrack()
             db_track.from_track(t)

@@ -61,13 +61,19 @@ class GPMPlGen:
         for p in playlists_with_contents:
             if p['id'] in static_playlists_ids:
                 if 'tracks' in p:
-                    songs_from_static_playlists.extend(p['tracks'])
+                    for t in p['tracks']:
+                        if 'track' in t:
+                            track = t['track']
+                            track['id'] = t['id']
+                        else:
+                            track = t
+                        songs_from_static_playlists.append(track)
         self.logger.info("Loaded %d songs" % (len(songs_from_static_playlists)))
         return songs_from_static_playlists
 
     def store_songs_in_db(self):
         library_from_gpm = self._get_all_songs()
-        self.db.ingest_library(library_from_gpm, LibraryDb.LIBRARY_DB)
+        self.db.ingest_track_list(library_from_gpm, LibraryDb.LIBRARY_DB)
 
     def store_playlists_in_db(self):
         self.logger.info("Downloading all generated playlists from library")
@@ -78,7 +84,7 @@ class GPMPlGen:
         self.logger.info("Loading %d static playlists"
                          % (len(other_playlists)))
         tracks = self._get_all_playlists_songs(other_playlists)
-        self.db.ingest_library(tracks, LibraryDb.STATIC_PL_DB)
+        self.db.ingest_track_list(tracks, LibraryDb.STATIC_PL_DB)
 
     def retrieve_library(self, get_songs=True, get_playlists=True):
         if self.db.cache_mode:
