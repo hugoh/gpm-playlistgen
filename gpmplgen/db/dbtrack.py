@@ -2,6 +2,8 @@ from dbitem import *
 
 class DbTrack(DbItem):
 
+    UNIQUE_CONSTRAINT = 'UNIQUE (trackId, albumId, discNumber, trackNumber, playCount) ON CONFLICT IGNORE'
+
     def __init__(self):
         columns = [
             DbColumn('id', 'TEXT'),
@@ -14,6 +16,9 @@ class DbTrack(DbItem):
             DbColumn('playCount', 'INTEGER')
         ]
         DbItem.__init__(self, columns)
+
+    def get_constrained_schema(self):
+        return '(%s, %s)' % (self.get_schema_inner(), self.UNIQUE_CONSTRAINT)
 
     def from_track(self, track):
         self.id = track.get('id')

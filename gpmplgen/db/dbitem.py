@@ -10,9 +10,12 @@ class DbItem:
         names = map(lambda c: c.get_name(), self._columns)
         return string.join(names, ',')
 
-    def get_schema(self):
+    def get_schema_inner(self):
         definition = map(lambda c: c.get_column_def(), self._columns)
-        return '(' + string.join(definition, ',') + ')'
+        return string.join(definition, ',')
+
+    def get_schema(self):
+        return '(' + self.get_schema_inner() + ')'
 
     def from_db_row(self, row):
         i = 0

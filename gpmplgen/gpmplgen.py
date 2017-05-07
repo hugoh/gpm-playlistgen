@@ -4,7 +4,7 @@ import logging
 from gmusicapi import Mobileclient
 
 from clientmock import ClientMock
-from .db.library import LibraryDb
+from .db.librarydb import LibraryDb
 from gpm import *
 
 
@@ -73,25 +73,28 @@ class GPMPlGen:
 
     def store_songs_in_db(self):
         library_from_gpm = self._get_all_songs()
-        self.db.ingest_track_list(library_from_gpm, LibraryDb.LIBRARY_DB)
+        self.db.ingest_track_list(library_from_gpm, LibraryDb.LIBRARY_TABLE)
 
-    def store_playlists_in_db(self):
+    def store_playlists_in_db(self, get_songs=True):
         self.logger.info("Downloading all generated playlists from library")
         (generated_playlists, other_playlists) = self._get_all_playlists()
         self.logger.info("Loading %d generated playlists"
-                         % (len(other_playlists)))
+                         % (len(generated_playlists)))
         self.db.ingest_generated_playlists(generated_playlists)
+        if not get_songs:
+            return
         self.logger.info("Loading %d static playlists"
                          % (len(other_playlists)))
         tracks = self._get_all_playlists_songs(other_playlists)
-        self.db.ingest_track_list(tracks, LibraryDb.STATIC_PL_DB)
+        self.db.ingest_track_list(tracks, LibraryDb.STATIC_PL_TABLE)
 
-    def retrieve_library(self, get_songs=True, get_playlists=True):
+    def retrieve_library(self, get_songs=True):
         if self.db.cache_mode:
             if self.config.write_to_db:
                 self.logger.info("Storing into cache")
                 self.store_songs_in_db()
                 self.store_playlists_in_db()
+                self.db.consolidate_all_tracks()
             else:
                 self.logger.info("Using cache")
             return
@@ -99,14 +102,13 @@ class GPMPlGen:
         # Get songs
         if get_songs:
             self.store_songs_in_db()
-        else:
-            self.logger.info('Skipping getting songs')
 
-        # Get generated playlists
-        if get_playlists:
-            self.store_playlists_in_db()
-        else:
-            self.logger.info('Skipping getting playlists')
+        # Get playlists and potentially their contents
+        self.store_playlists_in_db(get_songs)
+
+        # Generate full track list
+        if get_songs:
+            self.db.consolidate_track_lists()
 
     def _get_all_playlists(self):
         self.logger.info('Getting playlists')
