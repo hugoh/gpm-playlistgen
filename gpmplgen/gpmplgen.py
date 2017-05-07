@@ -108,7 +108,7 @@ class GPMPlGen:
 
         # Generate full track list
         if get_songs:
-            self.db.consolidate_track_lists()
+            self.db.consolidate_all_tracks()
 
     def _get_all_playlists(self):
         self.logger.info('Getting playlists')
