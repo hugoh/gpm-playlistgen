@@ -7,5 +7,4 @@ playlists:
         # One playlist per months tracks were added to library
     most_played:
         # Ordered list of tracks most played
-        include_playlists: true # Include tracks in playlists in addition to library
         #limit: 1000 # Default is top 1000; it's also the max

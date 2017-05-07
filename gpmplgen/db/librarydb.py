@@ -59,10 +59,10 @@ class LibraryDb:
                            db_playlist.values())
         self.db_conn.commit()
 
-    def get_tracks(self, query=''):
+    def get_tracks(self, query='', table=LIBRARY_TABLE):
         c = self.db_conn.cursor()
         tracks = []
-        for row in c.execute("SELECT * FROM %s %s" % (self.LIBRARY_TABLE, query)):
+        for row in c.execute("SELECT * FROM %s %s" % (table, query)):
             db_tracks = DbTrack()
             db_tracks.from_db_row(row)
             tracks.append(db_tracks)
