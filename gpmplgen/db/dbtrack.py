@@ -2,9 +2,12 @@ from dbitem import *
 
 class DbTrack(DbItem):
 
+    UNIQUE_CONSTRAINT = 'UNIQUE (trackId, albumId, discNumber, trackNumber, playCount) ON CONFLICT IGNORE'
+
     def __init__(self):
         columns = [
             DbColumn('id', 'TEXT'),
+            DbColumn('trackId', 'TEXT'),
             DbColumn('albumId', 'TEXT'),
             DbColumn('discNumber', 'INTEGER'),
             DbColumn('trackNumber', 'INTEGER'),
@@ -14,8 +17,12 @@ class DbTrack(DbItem):
         ]
         DbItem.__init__(self, columns)
 
+    def get_constrained_schema(self):
+        return '(%s, %s)' % (self.get_schema_inner(), self.UNIQUE_CONSTRAINT)
+
     def from_track(self, track):
         self.id = track.get('id')
+        self.trackId = track.get('trackId', '')
         self.albumId = track.get('albumId', '')
         self.discNumber = int(track.get('discNumber', 0))
         self.trackNumber = int(track.get('trackNumber', 0))

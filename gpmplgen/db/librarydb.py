@@ -8,8 +8,10 @@ from gpmplgen.gpm.gpmitem import GPMItem
 
 
 class LibraryDb:
-    LIBRARY_DB = 'library'
-    GENERATED_PL_DB = 'generated_playlists'
+    LIBRARY_TABLE = 'library'
+    STATIC_PL_TABLE = 'static_playlists'
+    GENERATED_PL_TABLE = 'generated_playlists'
+    ALLTRACKS_TABLE = 'alltracks'
 
     def __init__(self, db_filename=None):
         self.logger = logging.getLogger(__name__)
@@ -27,41 +29,40 @@ class LibraryDb:
         self.db_conn.commit()
         self.db_conn.close()
 
-    def ingest_library(self, gpmLibrary):
+    def ingest_track_list(self, track_list, table):
         cursor = self.db_conn.cursor()
-        try:
-            cursor.execute("DROP TABLE %s" % self.LIBRARY_DB)
-        except sqlite3.OperationalError:
-            pass
-        cursor.execute("CREATE TABLE %s %s" % (self.LIBRARY_DB, DbTrack().get_schema()))
-        for track in gpmLibrary:
+        self._create_table(cursor, table, DbTrack().get_schema())
+        for track in track_list:
             t = GPMItem(track)
             db_track = DbTrack()
             db_track.from_track(t)
-            cursor.execute("INSERT INTO %s VALUES %s" % (self.LIBRARY_DB, db_track.to_sql_placeholder()),
+            cursor.execute("INSERT INTO %s VALUES %s" % (table, db_track.to_sql_placeholder()),
                            db_track.values())
         self.db_conn.commit()
-        self.initialized = True
+
+    def consolidate_all_tracks(self):
+        cursor = self.db_conn.cursor()
+        self._create_table(cursor, self.ALLTRACKS_TABLE, DbTrack().get_constrained_schema())
+        for table in [self.LIBRARY_TABLE, self.STATIC_PL_TABLE]:
+            cursor.execute("INSERT INTO %s SELECT * FROM %s" % (self.ALLTRACKS_TABLE, table))
+        self.db_conn.commit()
+
 
     def ingest_generated_playlists(self, playlists):
         cursor = self.db_conn.cursor()
-        try:
-            cursor.execute("DROP TABLE %s" % self.GENERATED_PL_DB)
-        except sqlite3.OperationalError:
-            pass
-        cursor.execute("CREATE TABLE %s %s" % (self.GENERATED_PL_DB, DbPlaylist().get_schema()))
+        self._create_table(cursor, self.GENERATED_PL_TABLE, DbPlaylist().get_schema())
         for pl in playlists:
             p = GPMItem(pl)
             db_playlist = DbPlaylist()
             db_playlist.from_playlist(p)
-            cursor.execute('INSERT INTO %s VALUES %s' % (self.GENERATED_PL_DB, db_playlist.to_sql_placeholder()),
+            cursor.execute('INSERT INTO %s VALUES %s' % (self.GENERATED_PL_TABLE, db_playlist.to_sql_placeholder()),
                            db_playlist.values())
         self.db_conn.commit()
 
-    def get_tracks(self, query=''):
+    def get_tracks(self, query='', table=LIBRARY_TABLE):
         c = self.db_conn.cursor()
         tracks = []
-        for row in c.execute("SELECT * FROM %s %s" % (self.LIBRARY_DB, query)):
+        for row in c.execute("SELECT * FROM %s %s" % (table, query)):
             db_tracks = DbTrack()
             db_tracks.from_db_row(row)
             tracks.append(db_tracks)
@@ -70,8 +71,15 @@ class LibraryDb:
     def get_generated_playlists(self, query=''):
         c = self.db_conn.cursor()
         playlists = []
-        for row in c.execute("SELECT * FROM %s %s" % (self.GENERATED_PL_DB, query)):
+        for row in c.execute("SELECT * FROM %s %s" % (self.GENERATED_PL_TABLE, query)):
             db_playlist = DbPlaylist()
             db_playlist.from_db_row(row)
             playlists.append(db_playlist)
         return playlists
+
+    def _create_table(self, cursor, table, schema):
+        try:
+            cursor.execute("DROP TABLE %s" % table)
+        except sqlite3.OperationalError:
+            pass
+        cursor.execute("CREATE TABLE %s %s" % (table, schema))

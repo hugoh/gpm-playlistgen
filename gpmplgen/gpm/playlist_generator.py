@@ -95,6 +95,7 @@ class PlaylistGenerator:
             self.logger.warn("Playlists not supported yet for most played")
         playlist = Playlist(self.full_playlist_name('Most played'), self.timestamp)
         playlist.set_type(self.MOST_PLAYED)
-        for track in self.library_db.get_tracks("ORDER BY playCount DESC, recentTimestamp DESC LIMIT %d" % limit):
+        for track in self.library_db.get_tracks("ORDER BY playCount DESC, recentTimestamp DESC LIMIT %d" % limit,
+                                                LibraryDb.ALLTRACKS_TABLE):
             playlist.add_track(track.id)
         return PlaylistGeneratorResults(delete_playlists, [playlist])
