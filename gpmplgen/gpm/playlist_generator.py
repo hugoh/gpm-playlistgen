@@ -28,7 +28,9 @@ class PlaylistGenerator:
         self.library_db = library_db
 
     def generate(self, playlist_type, config):
-        gen_func = getattr(self, "_gen_" + playlist_type)
+        method_name = "_gen_" + playlist_type
+        self.logger.debug("Generating playlists with %s" % method_name)
+        gen_func = getattr(self, method_name)
         return gen_func(config)
 
     def full_playlist_name(self, name):
@@ -46,6 +48,7 @@ class PlaylistGenerator:
         return tested < current
 
     def _gen_monthly_added(self, config):
+        self.logger.debug("Generating monthly added playlists")
         songs_by_month = {}
         current_yearmonth = self._gen_yearmonth(self.timestamp)
         dbplaylist_cache = DbPlaylistCache()
@@ -83,19 +86,16 @@ class PlaylistGenerator:
         return PlaylistGeneratorResults(delete_playlists, new_playlists)
 
     def _gen_most_played(self, config):
-        if config.has_key('limit'):
-            limit = min(config['limit'], Playlist.PLAYLIST_MAX)
+        self.logger.debug("Generating most played playlist")
+        if config is not None and 'limit' in config:
+            limit = min(int(config['limit']), Playlist.PLAYLIST_MAX)
         else:
             limit = Playlist.PLAYLIST_MAX
-        include_playlists = False
+        self.logger.debug("Most played limit: %d" % limit)
         delete_playlists = self.library_db.get_generated_playlists("WHERE type='%s'" % (self.MOST_PLAYED))
-        if config.has_key('include_playlists'):
-            include_playlists = config['include_playlists']
-        if include_playlists:
-            self.logger.warn("Playlists not supported yet for most played")
         playlist = Playlist(self.full_playlist_name('Most played'), self.timestamp)
         playlist.set_type(self.MOST_PLAYED)
         for track in self.library_db.get_tracks("ORDER BY playCount DESC, recentTimestamp DESC LIMIT %d" % limit,
-                                                LibraryDb.ALLTRACKS_TABLE):
+                                                self.library_db.ALLTRACKS_TABLE):
             playlist.add_track(track.id)
         return PlaylistGeneratorResults(delete_playlists, [playlist])
