@@ -50,15 +50,24 @@ class PlaylistGenerator:
     def _gen_monthly_added(self, config):
         self.logger.debug("Generating monthly added playlists")
         songs_by_month = {}
+        ignored_months = {}
         current_yearmonth = self._gen_yearmonth(self.timestamp)
         dbplaylist_cache = DbPlaylistCache()
         delete_playlists = []
         new_playlists = []
+        exclude_before = None
+        if config is not None and "exclude" in config:
+            if "before" in config["exclude"]:
+                exclude_before = config["exclude"]["before"]
         for track in self.library_db.get_tracks("ORDER BY creationTimestamp, discNumber, trackNumber"):
             # Group by year & month
             created_time_ms = track.creationTimestamp
             created_time = created_time_ms / (10 ** 6)
             created_yearmonth = self._gen_yearmonth(created_time)
+            # Check if we should exclude any tracks
+            if exclude_before and created_yearmonth < exclude_before:
+                ignored_months[created_yearmonth] = 1;
+                continue
             pl_type = self.MONTHLY_ADDED
             pl_args = created_yearmonth
             current_playlists_final = dbplaylist_cache.are_final_check(pl_type, pl_args)
@@ -79,6 +88,8 @@ class PlaylistGenerator:
                 pl.set_final(self._is_yearmonth_old(current_yearmonth, created_yearmonth))
                 songs_by_month[created_yearmonth] = pl
             songs_by_month[created_yearmonth].add_track(track.id)
+        if len(ignored_months) > 0:
+            self.logger.info("Skipping tracks added in %s " % (", ".join(sorted(ignored_months.keys()))))
         for m in sorted(songs_by_month.keys()):
             pl = songs_by_month[m]
             for p in pl.get_ingestable_playlists():

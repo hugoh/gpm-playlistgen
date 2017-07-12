@@ -5,6 +5,9 @@ prefix: "[PG]" # This is the default; it can be set to "" for no prefix
 playlists:
     monthly_added:
         # One playlist per months tracks were added to library
+        # Some months can be excluded with:
+        #exclude:
+        #    before: 2016-11
     most_played:
         # Ordered list of tracks most played
         #limit: 1000 # Default is top 1000; it's also the max
