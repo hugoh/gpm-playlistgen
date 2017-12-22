@@ -36,7 +36,7 @@ class LibraryDb:
             t = GPMItem(track)
             db_track = DbTrack()
             db_track.from_track(t)
-            cursor.execute("INSERT INTO %s VALUES %s" % (table, db_track.to_sql_placeholder()),
+            cursor.execute("INSERT INTO {} VALUES {}".format(table, db_track.sql_field_parameters()),
                            db_track.values())
         self.db_conn.commit()
 
@@ -44,7 +44,7 @@ class LibraryDb:
         cursor = self.db_conn.cursor()
         self._create_table(cursor, self.ALLTRACKS_TABLE, DbTrack().get_constrained_schema())
         for table in [self.LIBRARY_TABLE, self.STATIC_PL_TABLE]:
-            cursor.execute("INSERT INTO %s SELECT * FROM %s" % (self.ALLTRACKS_TABLE, table))
+            cursor.execute("INSERT INTO {} SELECT * FROM {}".format(self.ALLTRACKS_TABLE, table))
         self.db_conn.commit()
 
 
@@ -55,14 +55,15 @@ class LibraryDb:
             p = GPMItem(pl)
             db_playlist = DbPlaylist()
             db_playlist.from_playlist(p)
-            cursor.execute('INSERT INTO %s VALUES %s' % (self.GENERATED_PL_TABLE, db_playlist.to_sql_placeholder()),
+
+            cursor.execute("INSERT INTO {} VALUES {}".format(self.GENERATED_PL_TABLE, db_playlist.sql_field_parameters()),
                            db_playlist.values())
         self.db_conn.commit()
 
     def get_tracks(self, query='', table=LIBRARY_TABLE):
         c = self.db_conn.cursor()
         tracks = []
-        for row in c.execute("SELECT * FROM %s %s" % (table, query)):
+        for row in c.execute("SELECT * FROM {} {}".format(table, query)):
             db_tracks = DbTrack()
             db_tracks.from_db_row(row)
             tracks.append(db_tracks)
@@ -71,7 +72,7 @@ class LibraryDb:
     def get_generated_playlists(self, query=''):
         c = self.db_conn.cursor()
         playlists = []
-        for row in c.execute("SELECT * FROM %s %s" % (self.GENERATED_PL_TABLE, query)):
+        for row in c.execute("SELECT * FROM {} {}".format(self.GENERATED_PL_TABLE, query)):
             db_playlist = DbPlaylist()
             db_playlist.from_db_row(row)
             playlists.append(db_playlist)
@@ -79,7 +80,7 @@ class LibraryDb:
 
     def _create_table(self, cursor, table, schema):
         try:
-            cursor.execute("DROP TABLE %s" % table)
+            cursor.execute("DROP TABLE {}".format(table))
         except sqlite3.OperationalError:
             pass
-        cursor.execute("CREATE TABLE %s %s" % (table, schema))
+        cursor.execute("CREATE TABLE {} {}".format(table, schema))

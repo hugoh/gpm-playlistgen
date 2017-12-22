@@ -24,7 +24,8 @@ class DbItem:
             setattr(self, a, row[i])
             i += 1
 
-    def to_sql_placeholder(self):
+    def sql_field_parameters(self):
+        """Generate a parameterized string"""
         placeholder = []
         for _ in self._columns:
             placeholder.append('?')
