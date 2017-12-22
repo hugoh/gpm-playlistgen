@@ -19,7 +19,7 @@ class Config:
         self.dev_db_operation = None
 
     def fromYaml(self, path):
-        cfg = yaml.load(path)
+        cfg = yaml.safe_load(path)
         self.username = cfg['auth']['user']
         self.password = cfg['auth']['passwd']
         self.playlist_prefix = cfg['prefix']
