@@ -1,2 +1,2 @@
-from playlist import *
-from playlist_generator import *
+from .playlist import *
+from .playlist_generator import *

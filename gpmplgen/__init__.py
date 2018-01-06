@@ -1,2 +1,2 @@
-from gpmplgen import *
-from config import *
+from .gpmplgen import *
+from .config import *

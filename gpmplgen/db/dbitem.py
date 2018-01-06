@@ -8,11 +8,11 @@ class DbItem:
 
     def get_columns(self):
         names = map(lambda c: c.get_name(), self._columns)
-        return string.join(names, ',')
+        return ",".join(names)
 
     def get_schema_inner(self):
         definition = map(lambda c: c.get_column_def(), self._columns)
-        return string.join(definition, ',')
+        return ",".join(definition)
 
     def get_schema(self):
         return '(' + self.get_schema_inner() + ')'
@@ -29,7 +29,7 @@ class DbItem:
         placeholder = []
         for _ in self._columns:
             placeholder.append('?')
-        return '(' + string.join(placeholder, ',') + ')'
+        return '(' + ",".join(placeholder) + ')'
 
     def values(self):
         values = ()
@@ -47,4 +47,4 @@ class DbColumn:
         return self.name
 
     def get_column_def(self):
-        return '%s %s' % (self.name, string.upper(self.type))
+        return '%s %s' % (self.name, self.type.upper())

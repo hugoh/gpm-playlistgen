@@ -1,7 +1,7 @@
 import json
 import logging
 
-from dbitem import *
+from .dbitem import *
 
 
 class DbPlaylist(DbItem):

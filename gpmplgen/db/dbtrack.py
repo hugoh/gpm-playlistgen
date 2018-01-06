@@ -1,4 +1,4 @@
-from dbitem import *
+from .dbitem import *
 
 class DbTrack(DbItem):
 

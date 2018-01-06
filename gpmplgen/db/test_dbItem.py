@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from dbitem import *
+from .dbitem import *
 
 class TestDbItem(TestCase):
     def setUp(self):
