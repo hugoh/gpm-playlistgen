@@ -144,8 +144,8 @@ class GPMPlGen:
         generator = PlaylistGenerator(self.config.playlist_prefix, self.timestamp, self.db)
         try:
             generator_results = generator.generate(playlist_type, playlistConfig)
-        except AttributeError:
-            self.logger.error('Method %s does not exist' % playlist_type)
+        except PlaylistGeneratorError as e:
+            self.logger.error(e)
             return
         self.delete_playlists(generator_results.get_playlists_to_delete())
         playlists_to_create = generator_results.get_playlists_to_create()
