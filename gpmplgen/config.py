@@ -27,7 +27,7 @@ class Config:
         self.playlists = cfg['playlists']
         try:
             self.client_id = cfg['client_id']
-        except:
+        except KeyError:
             pass
 
     def fromCli(self, args):
