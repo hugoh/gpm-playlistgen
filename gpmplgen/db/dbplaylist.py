@@ -1,7 +1,7 @@
 import json
 import logging
 
-from dbitem import *
+from .dbitem import *
 
 
 class DbPlaylist(DbItem):
@@ -40,13 +40,13 @@ class DbPlaylistCache():
 
     def are_final_check(self, pl_type, pl_args):
         key = "%s:%s" % (pl_type, pl_args)
-        if self.final_cache.has_key(key):
+        if key in self.final_cache:
             return self.final_cache[key]
         return None
 
     def are_final(self, pl_type, pl_args, playlists):
         key = "%s:%s" % (pl_type, pl_args)
-        if self.final_cache.has_key(key):
+        if key in self.final_cache:
             return self.final_cache[key]
         final = False
         for p in playlists:

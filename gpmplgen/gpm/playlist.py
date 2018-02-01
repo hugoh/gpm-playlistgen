@@ -79,7 +79,7 @@ class Playlist:
                 if desc['version'] == Playlist.VERSION:
                    return True
                 else:
-                    logging.warn("Unsupported version")
+                    logging.error("Unsupported version")
         except:
             return False
         return False

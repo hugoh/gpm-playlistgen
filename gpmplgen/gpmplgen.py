@@ -3,9 +3,9 @@ import logging
 
 from gmusicapi import Mobileclient
 
-from clientmock import ClientMock
+from .clientmock import ClientMock
 from .db.librarydb import LibraryDb
-from gpm import *
+from .gpm import *
 
 
 class GPMPlGen:
@@ -23,7 +23,12 @@ class GPMPlGen:
         # Logging in
         self.logger.info('Logging in %s' % config.username)
         try:
-            self.client.login(config.username, config.password, Mobileclient.FROM_MAC_ADDRESS)
+            android_id = config.client_id
+            if android_id is None:
+                android_id = Mobileclient.FROM_MAC_ADDRESS
+            success = self.client.login(config.username, config.password, android_id)
+            if not success:
+                raise GPMPlGenException("Could not log in")
         except Exception as e:
             raise GPMPlGenException("Could not log in", e)
 
@@ -139,8 +144,8 @@ class GPMPlGen:
         generator = PlaylistGenerator(self.config.playlist_prefix, self.timestamp, self.db)
         try:
             generator_results = generator.generate(playlist_type, playlistConfig)
-        except AttributeError:
-            self.logger.error('Method %s does not exist' % playlist_type)
+        except PlaylistGeneratorError as e:
+            self.logger.error(e)
             return
         self.delete_playlists(generator_results.get_playlists_to_delete())
         playlists_to_create = generator_results.get_playlists_to_create()
@@ -162,4 +167,4 @@ class GPMPlGenException(Exception):
 
     def __str__(self):
         logging.getLogger(__name__).debug(self.parent_exception)
-        return self.message
+        return "%s: %s" % (self.message, self.parent_exception)

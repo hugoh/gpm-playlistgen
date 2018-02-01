@@ -8,7 +8,7 @@ import logging
 
 def build_argparser():
     parser = argparse.ArgumentParser(description='Create playlists automatically.')
-    parser.add_argument('config', type=file, help='Config file')
+    parser.add_argument('config', type=argparse.FileType("r"), help='Config file')
     parser.add_argument('--dry-run', action='store_true', help="Don't do any actual changes")
     parser.add_argument('--delete-all-playlists', action='store_true',
                         help="Delete all generated playlists and exit immediately")

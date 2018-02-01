@@ -17,6 +17,7 @@ class Config:
         self.delete_all_playlists = False
         self.playlists = []
         self.dev_db_operation = None
+        self.client_id = None
 
     def fromYaml(self, path):
         cfg = yaml.safe_load(path)
@@ -24,6 +25,10 @@ class Config:
         self.password = cfg['auth']['passwd']
         self.playlist_prefix = cfg['prefix']
         self.playlists = cfg['playlists']
+        try:
+            self.client_id = cfg['client_id']
+        except KeyError:
+            pass
 
     def fromCli(self, args):
         self.force = args.force

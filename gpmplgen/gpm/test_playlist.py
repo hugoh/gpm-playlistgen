@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from playlist import Playlist
+from .playlist import Playlist
 import json
 
 
@@ -43,7 +43,7 @@ class TestPlaylist(TestCase):
         list_count = 3
         extra_count = 5
         total_count = Playlist.PLAYLIST_MAX * (list_count - 1) + extra_count
-        for i in xrange(total_count):
+        for i in range(total_count):
             self.sample_playlist.add_track(i)
         i = 0
         self.sample_playlist.set_type(self.TYPE)

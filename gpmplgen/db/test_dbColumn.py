@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from dbitem import DbColumn
+from .dbitem import DbColumn
 
 class TestDbColumn(TestCase):
     def setUp(self):

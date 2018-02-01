@@ -11,3 +11,4 @@ playlists:
     most_played:
         # Ordered list of tracks most played
         #limit: 1000 # Default is top 1000; it's also the max
+# client_id: # Optional Android ID; should not be needed

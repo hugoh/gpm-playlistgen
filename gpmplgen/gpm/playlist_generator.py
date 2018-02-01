@@ -30,7 +30,10 @@ class PlaylistGenerator:
     def generate(self, playlist_type, config):
         method_name = "_gen_" + playlist_type
         self.logger.debug("Generating playlists with %s" % method_name)
-        gen_func = getattr(self, method_name)
+        try:
+            gen_func = getattr(self, method_name)
+        except AttributeError:
+            raise PlaylistGeneratorError("Unsupported playlist type '%s'" % playlist_type)
         return gen_func(config)
 
     def full_playlist_name(self, name):
@@ -110,3 +113,6 @@ class PlaylistGenerator:
                                                 self.library_db.ALLTRACKS_TABLE):
             playlist.add_track(track.id)
         return PlaylistGeneratorResults(delete_playlists, [playlist])
+
+class PlaylistGeneratorError(Exception):
+    pass
