@@ -1,6 +1,12 @@
+image: debian:latest
+
+
+before_script:
+  - apt-get update -qy
+  - apt-get install -y python-dev python3-dev python-pip
+  - pip install tox bandit
+
+
 test:
   script:
-  - apt-get update -qy
-  - apt-get install -y python-dev python-pip
-  - pip install tox bandit
-  - make test
+  - make test-ci
