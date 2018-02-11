@@ -2,3 +2,6 @@ config.yaml
 *.pyc
 .idea
 *.swp
+virtualenv*/
+*.egg-info
+.tox/
