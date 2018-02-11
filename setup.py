@@ -12,7 +12,7 @@ setup(name='GPM-Playlist-Generator',
       author='Hugo Haas',
       author_email='hugoh@hugoh.net',
       url='https://gitlab.com/hugoh/gpm-playlistgen',
-      packages=find_packages(),
+      packages=find_packages(exclude=('tests',)),
       scripts=[
           'scripts/gpm-playlistgen.py'
       ],

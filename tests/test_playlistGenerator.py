@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from unittest import TestCase
-from .playlist_generator import PlaylistGenerator, PlaylistGeneratorError
+from gpmplgen.gpm.playlist_generator import PlaylistGenerator, PlaylistGeneratorError
 
 
 class TestPlaylistGenerator(TestCase):

@@ -1,9 +1,9 @@
-.PHONY: test unittest bandit
+.PHONY: test tox bandit
 
-test: unittest bandit
+test: tox bandit
 
-unittest:
-	python -m unittest discover
+tox:
+	tox
 
 bandit:
-	bandit -r .
+	bandit -r scripts gpmplgen tests

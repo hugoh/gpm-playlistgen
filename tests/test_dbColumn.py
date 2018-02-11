@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from .dbitem import DbColumn
+from gpmplgen.db.dbitem import DbColumn
 
 class TestDbColumn(TestCase):
     def setUp(self):
