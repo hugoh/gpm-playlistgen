@@ -1,13 +1,33 @@
 image: debian:latest
 
+variables:
+    PYPI_USER: SECURE
+    PYPI_PASSWORD: SECURE
 
 before_script:
   - apt update -qy
   - apt upgrade -qy
-  - apt install -qy python-dev python3-dev python-pip
-  - pip install tox bandit
+  - apt install -qy python-dev python3-dev python-pip pandoc
+  - pip install pypandoc tox bandit twine
 
+stage:
+  - test
+  - build
+  - deploy
+  - cleanup
 
-test:
+build:
   script:
-  - make test
+  - python setup.py check sdist bdist_wheel
+
+deploy_pypi:
+  stage: deploy
+  script:
+  - sed -e "s/PYPI_USER/$PYPI_USER/g" -e "s/PYPI_PASSWORD/$PYPI_PASSWORD/g" >> ~/.pypirc
+  - VERSION=$(python setup.py -V) twine -r pypitest GPM-Playlist-Generator-$VERSION.tar.gz GPM_Playlist_Generator-$VERSION-py2-none-any.whl
+
+cleanup_pypirc:
+   stage: cleanup
+   when: always
+   script:
+    - rm -vf ~/.pypirc

@@ -5,3 +5,5 @@ config.yaml
 virtualenv*/
 *.egg-info
 .tox/
+dist/
+build/
