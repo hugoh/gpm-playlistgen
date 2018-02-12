@@ -10,7 +10,7 @@ with open('gpmplgen/__version__.py') as f:
 setup(name='GPM-Playlist-Generator',
       version=about['__version__'],
       description='Google Play Music - Playlist Generator',
-      long_description = pypandoc.convert_file('README.md', 'rst', format='gfm'),
+      long_description = pypandoc.convert_file('README.md', 'rst', format='markdown_github'),
       author='Hugo Haas',
       author_email='hugoh@hugoh.net',
       url='https://gitlab.com/hugoh/gpm-playlistgen',
