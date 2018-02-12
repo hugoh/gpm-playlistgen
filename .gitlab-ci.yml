@@ -4,35 +4,15 @@ variables:
     PYPI_USER: SECURE
     PYPI_PASSWORD: SECURE
 
-stages:
-  - setup
-  - test
-  - build
-  - deploy
-  - cleanup
-
-setup:
-  stage: setup
-  script:
+test_build_deploy:
+  before_script:
   - apt update -qy
   - apt upgrade -qy
   - apt install -qy python-dev python3-dev python-pip pandoc
   - pip install pypandoc tox bandit twine
-
-
-build:
-  stage: build
   script:
   - python setup.py check sdist bdist_wheel
-
-deploy_pypi:
-  stage: deploy
-  script:
   - sed -e "s/PYPI_USER/$PYPI_USER/g" -e "s/PYPI_PASSWORD/$PYPI_PASSWORD/g" >> ~/.pypirc
   - VERSION=$(python setup.py -V) twine -r pypitest GPM-Playlist-Generator-$VERSION.tar.gz GPM_Playlist_Generator-$VERSION-py2-none-any.whl
-
-cleanup_pypirc:
-   stage: cleanup
-   when: always
-   script:
-    - rm -vf ~/.pypirc
+  after_script:
+  - rm -vf ~/.pypirc
