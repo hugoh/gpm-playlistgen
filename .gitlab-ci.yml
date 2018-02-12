@@ -27,7 +27,7 @@ deploy:
   script:
   - pip install pypandoc twine
   - python setup.py check sdist bdist_wheel
-  - sed -e "s/PYPI_USER/$PYPI_USER/g" -e "s/PYPI_PASSWORD/$PYPI_PASSWORD/g" .pypirc >> ~/.pypirc
+  - make ~/.pypirc
   - twine upload -r pypitest dist/GPM-Playlist-Generator-*.tar.gz dist/GPM_Playlist_Generator-*.whl
   after_script:
   - rm -vf ~/.pypirc
