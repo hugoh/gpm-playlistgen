@@ -4,17 +4,20 @@ variables:
     PYPI_USER: SECURE
     PYPI_PASSWORD: SECURE
 
-before_script:
+stages:
+  - setup
+  - test
+  - build
+  - deploy
+  - cleanup
+
+setup:
+  script:
   - apt update -qy
   - apt upgrade -qy
   - apt install -qy python-dev python3-dev python-pip pandoc
   - pip install pypandoc tox bandit twine
 
-stages:
-  - test
-  - build
-  - deploy
-  - cleanup
 
 build:
   script:
