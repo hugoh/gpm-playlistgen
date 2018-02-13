@@ -21,20 +21,16 @@ python3:
     - pip install pypandoc tox bandit
     - make test TOXENVLIST=py3
 
-# deploy_test:
-#   stage: deploy
-#   image: python:latest
-#   script:
-#   - pip install pypandoc twine
-#   - python setup.py check sdist bdist_wheel
-#   - make ~/.pypirc
-#   - twine upload -r pypitest dist/GPM-Playlist-Generator-*.tar.gz dist/GPM_Playlist_Generator-*.whl
-#   after_script:
-#   - rm -vf ~/.pypirc 
-#   except:
-#     - master
+package_only:
+  stage: deploy
+  image: python:latest
+  script:
+  - pip install pypandoc
+  - python setup.py check sdist bdist_wheel
+  except:
+    - master
 
-deploy:
+package_and_deploy:
   stage: deploy
   image: python:latest
   script:
