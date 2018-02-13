@@ -26,7 +26,7 @@ package_only:
   image: python:latest
   script:
   - pip install pypandoc
-  - python setup.py check sdist bdist_wheel
+  - make package
   except:
     - master
 
@@ -35,9 +35,8 @@ package_and_deploy:
   image: python:latest
   script:
   - pip install pypandoc twine
-  - python setup.py check sdist bdist_wheel
-  - make ~/.pypirc
-  - twine upload dist/GPM-Playlist-Generator-*.tar.gz dist/GPM_Playlist_Generator-*.whl
+  - make package
+  - make deploy
   after_script:
   - rm -vf ~/.pypirc
   only:
