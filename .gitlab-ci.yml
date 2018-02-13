@@ -1,7 +1,44 @@
-test:
+stages:
+  - test
+  - deploy
+
+before_script:
+  - apt update -qy
+  - apt upgrade -qy
+  - apt install -qy pandoc
+
+python2:
+  stage: test
+  image: python:2
   script:
-  - apt-get update -qy
-  - apt-get install -y python-dev python-pip
-  - pip install -r requirements.txt
-  - pip install bandit
-  - make test
+    - pip install pypandoc tox bandit
+    - make test TOXENVLIST=py2
+
+python3:
+  stage: test
+  image: python:3
+  script:
+    - pip install pypandoc tox bandit
+    - make test TOXENVLIST=py3
+
+package_only:
+  stage: deploy
+  image: python:latest
+  script:
+  - pip install pypandoc
+  - python setup.py check sdist bdist_wheel
+  except:
+    - master
+
+package_and_deploy:
+  stage: deploy
+  image: python:latest
+  script:
+  - pip install pypandoc twine
+  - python setup.py check sdist bdist_wheel
+  - make ~/.pypirc
+  - twine upload dist/GPM-Playlist-Generator-*.tar.gz dist/GPM_Playlist_Generator-*.whl
+  after_script:
+  - rm -vf ~/.pypirc
+  only:
+    - master

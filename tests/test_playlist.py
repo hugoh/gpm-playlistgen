@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from .playlist import Playlist
+from gpmplgen.gpm.playlist import Playlist
 import json
 
 

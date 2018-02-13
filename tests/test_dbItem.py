@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from .dbitem import *
+from gpmplgen.db.dbitem import *
 
 class TestDbItem(TestCase):
     def setUp(self):
