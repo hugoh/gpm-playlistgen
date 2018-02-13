@@ -10,12 +10,18 @@ It's currently in beta, and some knowledge of Python and comfort with the comman
 
 Copy `config.sample.yaml` into `config.yaml`, and add your account name under `auth.user` and your password (or an application-specific password if you have 2-factor authentication enabled) under `auth.password`.
 
-## Set up
+## Installation
 
-To set up the dependencies, you need Python 2.7+ and you need to run:
+You can either do a:
 
 ```sh
-pip install -r requirements.txt
+pip install GPM-Playlist-Generator
+```
+
+or if you've cloned this repo:
+
+```sh
+python setup.py install
 ```
 
 ## Running the tool
@@ -23,7 +29,7 @@ pip install -r requirements.txt
 Simply run:
 
 ```sh
-python gpm-playlistgen.py config.yaml
+gpm-playlistgen.py config.yaml
 ```
 
 ## What it does
@@ -42,7 +48,7 @@ If you rerun the tool, it will only regenerate the playlists that are needed (ne
 Try:
 
 ```sh
-python gpm-playlistgen.py config.yaml
+gpm-playlistgen.py config.yaml
 ```
 
 ## I want to report a problem or I have a cool idea for this tool
@@ -60,13 +66,13 @@ Please use the [issue tracker](https://gitlab.com/hugoh/gpm-playlistgen/issues).
 You can run:
 
 ```sh
-python gpm-playlistgen.py --delete-all-playlists config.yaml
+gpm-playlistgen.py --delete-all-playlists config.yaml
 ```
 
 The description field is used to check that this is a generated list, but I strongly advise to the the following first to see what it's going to do:
 
 ```sh
-python gpm-playlistgen.py --delete-all-playlists config.yaml --dry-run
+gpm-playlistgen.py --delete-all-playlists config.yaml --dry-run
 ```
 
 ## Credits
