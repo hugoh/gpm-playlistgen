@@ -25,13 +25,13 @@ Installation
 
 You can either do a:
 
-.. code:: sh
+.. code::
 
     pip install GPM-Playlist-Generator
 
 or if you've cloned this repo:
 
-.. code:: sh
+.. code::
 
     python setup.py install
 
@@ -40,7 +40,7 @@ Running the tool
 
 Simply run:
 
-.. code:: sh
+.. code::
 
     gpm-playlistgen.py config.yaml
 
@@ -68,7 +68,7 @@ I need help
 
 Try:
 
-.. code:: sh
+.. code::
 
     gpm-playlistgen.py config.yaml
 
@@ -92,7 +92,7 @@ I want to get rid of all those generated playlists
 
 You can run:
 
-.. code:: sh
+.. code::
 
     gpm-playlistgen.py --delete-all-playlists config.yaml
 
@@ -100,7 +100,7 @@ The description field is used to check that this is a generated list,
 but I strongly advise to the the following first to see what it's going
 to do:
 
-.. code:: sh
+.. code::
 
     gpm-playlistgen.py --delete-all-playlists config.yaml --dry-run
 
