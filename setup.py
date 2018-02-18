@@ -31,22 +31,23 @@ class CheckLatestVersionCommand(distutils.cmd.Command):
         pass
 
     def run(self):
-        """Run command."""
+        pkg_name = self.distribution.get_name()
+        pkg_version = self.distribution.get_version()
         search = SearchCommand()
-        options, _ = search.parse_args([PACKAGE_NAME])
-        pypi_hits = search.search(PACKAGE_NAME, options)
+        options, _ = search.parse_args([pkg_name])
+        pypi_hits = search.search(pkg_name, options)
         hits = transform_hits(pypi_hits)
 
         remote_version = None
         for hit in hits:
-            if hit['name'] == PACKAGE_NAME:
+            if hit['name'] == pkg_name:
                 remote_version = highest_version(hit['versions'])
-                self.announce("Found %s version %s on PyPi" % (PACKAGE_NAME, remote_version), log.INFO)
+                self.announce("Found %s version %s on PyPi" % (pkg_name, remote_version), log.INFO)
         if remote_version is None:
-            raise RuntimeError("Could not found %s on PyPi" % PACKAGE_NAME)
+            raise RuntimeError("Could not found %s on PyPi" % pkg_name)
         if StrictVersion(VERSION) <= StrictVersion(remote_version):
-            raise VersionError("Local version %s not greater than PyPi version %s" % (VERSION, remote_version))
-        self.announce("Local version %s higher than PyPi version" % VERSION)
+            raise VersionError("Local version %s not greater than PyPi version %s" % (pkg_version, remote_version))
+        self.announce("Local version %s higher than PyPi version" % pkg_version)
 
 
 class VersionError(RuntimeError):
