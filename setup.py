@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 
 from setuptools import find_packages, setup
-import pypandoc
 
 about = {}
 with open('gpmplgen/__version__.py') as f:
     exec(f.read(), about)
 
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
 setup(name='GPM-Playlist-Generator',
       version=about['__version__'],
       description='Google Play Music - Playlist Generator',
-      long_description = pypandoc.convert_file('README.md', 'rst', format='markdown_github'),
+      long_description = readme(),
       author='Hugo Haas',
       author_email='hugoh@hugoh.net',
       url='https://gitlab.com/hugoh/gpm-playlistgen',
