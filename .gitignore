@@ -7,3 +7,4 @@ virtualenv*/
 .tox/
 dist/
 build/
+.direnv/
