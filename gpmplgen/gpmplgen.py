@@ -149,15 +149,18 @@ class GPMPlGen:
             return
         self.delete_playlists(generator_results.get_playlists_to_delete())
         playlists_to_create = generator_results.get_playlists_to_create()
+        created = 0
         try:
             for pl in playlists_to_create:
                 pl.create_in_gpm(self.writer_client)
+                created = created + 1
         except GPMPlGenException as e:
             self.logger.error("Error talking to Google Play Music; attempting to clean-up")
             for pl in playlists_to_create:
                 pl.delete_in_gpm(self.writer_client)
             self.logger.debug(e.parent_exception)
             raise e  # FIXME: maybe not?
+        return created
 
 
 class GPMPlGenException(Exception):

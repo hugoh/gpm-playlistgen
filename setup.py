@@ -4,7 +4,11 @@ from setuptools import find_packages, setup
 import distutils.cmd
 from distutils import log
 from distutils.version import StrictVersion
-from pip.commands.search import SearchCommand, transform_hits, highest_version
+try:
+    from pip.commands.search import SearchCommand, transform_hits, highest_version
+except:
+    from pip._internal.commands.search import SearchCommand, transform_hits, highest_version
+
 
 PACKAGE_NAME = 'GPM-Playlist-Generator'
 

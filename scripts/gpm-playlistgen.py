@@ -38,11 +38,11 @@ if __name__ == '__main__':
         gpmplgen.retrieve_library()
         if cfg.write_to_db:
             sys.exit(0)
-        i = 0
+        created = 0
         for playlist in cfg.playlists.keys():
-            i += 1
-            gpmplgen.generate_playlist(playlist, cfg.playlists[playlist])
-        logging.info("Generated %d auto playlists" % i)
+            n = gpmplgen.generate_playlist(playlist, cfg.playlists[playlist])
+            created = created + n
+        logging.info("Generated %d auto playlist(s)" % created)
     except GPMPlGenException as e:
         logging.fatal(e)
         logging.fatal("Exiting...      :-(")
