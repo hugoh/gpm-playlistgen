@@ -36,7 +36,7 @@ class LibraryDb:
             t = GPMItem(track)
             db_track = DbTrack()
             db_track.from_track(t)
-            cursor.execute("INSERT INTO {} VALUES {}".format(table, db_track.sql_field_parameters()),
+            cursor.execute("INSERT INTO {} VALUES {}".format(table, db_track.sql_field_parameters()), # nosec -- B608:hardcoded_sql_expressions -- either hardcoded or properly escaped
                            db_track.values())
         self.db_conn.commit()
 
@@ -44,7 +44,7 @@ class LibraryDb:
         cursor = self.db_conn.cursor()
         self._create_table(cursor, self.ALLTRACKS_TABLE, DbTrack().get_constrained_schema())
         for table in [self.LIBRARY_TABLE, self.STATIC_PL_TABLE]:
-            cursor.execute("INSERT INTO {} SELECT * FROM {}".format(self.ALLTRACKS_TABLE, table))
+            cursor.execute("INSERT INTO {} SELECT * FROM {}".format(self.ALLTRACKS_TABLE, table)) # nosec -- B608:hardcoded_sql_expressions -- either hardcoded or properly escaped
         self.db_conn.commit()
 
 
@@ -56,14 +56,14 @@ class LibraryDb:
             db_playlist = DbPlaylist()
             db_playlist.from_playlist(p)
 
-            cursor.execute("INSERT INTO {} VALUES {}".format(self.GENERATED_PL_TABLE, db_playlist.sql_field_parameters()),
+            cursor.execute("INSERT INTO {} VALUES {}".format(self.GENERATED_PL_TABLE, db_playlist.sql_field_parameters()), # nosec -- B608:hardcoded_sql_expressions -- either hardcoded or properly escaped
                            db_playlist.values())
         self.db_conn.commit()
 
     def get_tracks(self, query='', table=LIBRARY_TABLE):
         c = self.db_conn.cursor()
         tracks = []
-        for row in c.execute("SELECT * FROM {} {}".format(table, query)):
+        for row in c.execute("SELECT * FROM {} {}".format(table, query)): # nosec -- B608:hardcoded_sql_expressions -- either hardcoded or properly escaped
             db_tracks = DbTrack()
             db_tracks.from_db_row(row)
             tracks.append(db_tracks)
@@ -72,7 +72,7 @@ class LibraryDb:
     def get_generated_playlists(self, query=''):
         c = self.db_conn.cursor()
         playlists = []
-        for row in c.execute("SELECT * FROM {} {}".format(self.GENERATED_PL_TABLE, query)):
+        for row in c.execute("SELECT * FROM {} {}".format(self.GENERATED_PL_TABLE, query)): # nosec -- B608:hardcoded_sql_expressions -- either hardcoded or properly escaped
             db_playlist = DbPlaylist()
             db_playlist.from_db_row(row)
             playlists.append(db_playlist)
