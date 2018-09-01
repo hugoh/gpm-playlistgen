@@ -1,3 +1,5 @@
-VERSION = (1, 0, 4)
+"""GPM Playlist Generator version"""
+
+VERSION = (1, 0, 5)
 
 __version__ = '.'.join(map(str, VERSION))

@@ -55,7 +55,7 @@ class GPMPlGen:
         return library_from_gpm
 
     def _get_all_playlists_songs(self, static_playlists):
-        self.logger.info("Downloading all tracks from playlists (this may take a few minutes)")
+        self.logger.info("Downloading all tracks from playlists")
         try:
             playlists_with_contents = self.client.get_all_user_playlist_contents()
             self.logger.info("Loaded %d playlists" % (len(playlists_with_contents)))
