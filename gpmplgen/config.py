@@ -6,8 +6,6 @@ class Config:
     DEFAULT_PREFIX = '[PG]'
 
     def __init__(self):
-        self.username = None
-        self.password = None
         self.playlist_prefix = self.DEFAULT_PREFIX
         self.log_level = logging.INFO
         self.library_cache = None
@@ -21,8 +19,6 @@ class Config:
 
     def fromYaml(self, path):
         cfg = yaml.safe_load(path)
-        self.username = cfg['auth']['user']
-        self.password = cfg['auth']['passwd']
         self.playlist_prefix = cfg['prefix']
         self.playlists = cfg['playlists']
         try:

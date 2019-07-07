@@ -1,6 +1,3 @@
-auth:
-    user: <your username> # Username for Google account
-    passwd: <your password> # Password (app-specific if 2FA is enabled)
 prefix: "[PG]" # This is the default; it can be set to "" for no prefix
 playlists:
     monthly_added:

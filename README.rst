@@ -12,14 +12,6 @@ user friendly. The author is using the tool and care is being taken not
 to make a mess in the library manipulated (I care about mine too), but
 USE AT YOUR OWN RISK.
 
-Authentication information
---------------------------
-
-Copy ``config.sample.yaml`` into ``config.yaml``, and add your account
-name under ``auth.user`` and your password (or an application-specific
-password if you have 2-factor authentication enabled) under
-``auth.password``.
-
 Installation
 ------------
 
@@ -48,9 +40,9 @@ What it does
 ------------
 
 The default configuration captured in ``config.sample.yaml`` will log
-into your account, download the list of tracks and playlists in your
-library, and do the following as per the ``playlist`` section in the
-configuration:
+prompt you to log into your account via OAuth, download the list of tracks
+and playlists in your library, and do the following as per the ``playlist``
+section in the configuration:
 
 -  Generate a set of playlists grouping your tracks by month in which
    they've been added to your library (``monthly_added``)
