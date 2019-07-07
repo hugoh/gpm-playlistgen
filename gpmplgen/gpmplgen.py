@@ -21,14 +21,17 @@ class GPMPlGen:
         gmusicapi_logger.setLevel(logging.INFO)
 
         # Logging in
-        self.logger.info('Logging in %s' % config.username)
+        self.logger.info('Logging in...')
         try:
             android_id = config.client_id
             if android_id is None:
                 android_id = Mobileclient.FROM_MAC_ADDRESS
-            success = self.client.login(config.username, config.password, android_id)
+            success = self.client.oauth_login(android_id)
             if not success:
-                raise GPMPlGenException("Could not log in")
+                self.client.perform_oauth()
+                success = self.client.oauth_login(android_id)
+                if not success:
+                    raise GPMPlGenException("Could not log in")
         except Exception as e:
             raise GPMPlGenException("Could not log in", e)
 
