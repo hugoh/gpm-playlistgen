@@ -3,8 +3,10 @@ config.yaml
 .idea
 *.swp
 virtualenv*/
+venv*/
 *.egg-info
 .tox/
 dist/
 build/
 .direnv/
+.vs/
