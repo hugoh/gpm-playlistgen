@@ -6,9 +6,9 @@ Google Play Music - Playlist Generator
 This is a command-line tool to generate a set of standard playlists for
 Google Play Music libraries.
 
-It's currently in beta, and some knowledge of Python and comfort with
-the command line is required. Depending on interest, I will make it more
-user friendly. The author is using the tool and care is being taken not
+Some knowledge of Python and comfort with the command line is required.
+Depending on interest, I will make it more user friendly.
+The author is using the tool and care is being taken not
 to make a mess in the library manipulated (I care about mine too), but
 USE AT YOUR OWN RISK.
 

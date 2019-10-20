@@ -76,7 +76,6 @@ setup(name=PACKAGE_NAME,
       classifiers=[
           'Environment :: Console',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 3',
           'Intended Audience :: End Users/Desktop',
           'Topic :: Multimedia :: Sound/Audio',
