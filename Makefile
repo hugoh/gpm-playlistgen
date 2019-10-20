@@ -16,8 +16,5 @@ bandit:
 package:
 	python setup.py check sdist bdist_wheel --universal
 
-check-version:
-	python setup.py check_latest_version
-
 deploy: ~/.pypirc
 	twine upload dist/GPM-Playlist-Generator-*.tar.gz dist/GPM_Playlist_Generator-*.whl
