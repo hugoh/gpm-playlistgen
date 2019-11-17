@@ -8,10 +8,10 @@ before_script:
 
 python3:
   stage: test
-  image: python:3
+  image: python:latest
   script:
-    - pip install tox bandit
-    - make test TOXENVLIST=py3
+    - pip install pre-commit
+    - pre-commit run --all-files
 
 package_only:
   stage: deploy
