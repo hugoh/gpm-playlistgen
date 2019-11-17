@@ -1,0 +1,16 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.4.0
+  hooks:
+  - id: check-yaml
+  - id: check-case-conflict
+  - id: detect-private-key
+-   repo: https://github.com/szebenyib/pre-commit-pytest
+    rev: ''
+    hooks:
+    - id: pytest
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+    rev: v1.0.4
+    hooks:
+    - id: python-bandit-vulnerability-check
+      args: [-r, scripts, gpmplgen, tests]
