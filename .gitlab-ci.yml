@@ -10,6 +10,7 @@ python3:
   stage: test
   image: python:latest
   script:
+    - python setup.py develop
     - pip install pre-commit pytest
     - pre-commit run --all-files
 
