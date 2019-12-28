@@ -24,7 +24,8 @@ package_only:
   stage: deploy
   image: python:latest
   script:
-  - make package check-version
+  # FIXME: check-version is broken
+  - make package # check-version
   except:
     - master
 
