@@ -5,7 +5,7 @@ TOXENVLIST=$(shell awk -F = '/^envlist=/ { print $$2; }' tox.ini)
 test: tox bandit
 
 tox:
-	tox -e ${TOXENVLIST}
+	tox
 
 bandit:
 	bandit -r scripts gpmplgen tests
