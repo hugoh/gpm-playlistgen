@@ -17,8 +17,8 @@ class Config:
         self.dev_db_operation = None
         self.client_id = None
 
-    def fromYaml(self, path):
-        cfg = yaml.safe_load(path)
+    def fromYaml(self, fd):
+        cfg = yaml.safe_load(fd)
         self.playlist_prefix = cfg['prefix']
         self.playlists = cfg['playlists']
         try:

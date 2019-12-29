@@ -102,5 +102,5 @@ Credits
 The heavy lifting is done by `Simon Weber's
 gmusicapi <https://github.com/simon-weber/gmusicapi>`__.
 
-.. |build status| image:: https://gitlab.com/hugoh/gpm-playlistgen/badges/master/build.svg
+.. |build status| image:: https://gitlab.com/hugoh/gpm-playlistgen/badges/master/pipeline.svg
    :target: https://gitlab.com/hugoh/gpm-playlistgen/commits/master
