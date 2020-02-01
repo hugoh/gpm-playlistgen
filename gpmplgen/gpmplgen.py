@@ -53,7 +53,7 @@ class GPMPlGen:
         try:
             library_from_gpm = self.client.get_all_songs(incremental=False)
         except Exception as e:
-            GPMPlGenException("Could not download library", e)
+            raise GPMPlGenException("Could not download library", e)
         self.logger.info("Loaded %d songs" % (len(library_from_gpm)))
         return library_from_gpm
 
@@ -63,7 +63,7 @@ class GPMPlGen:
             playlists_with_contents = self.client.get_all_user_playlist_contents()
             self.logger.info("Loaded %d playlists" % (len(playlists_with_contents)))
         except Exception as e:
-            GPMPlGenException("Could not download playlist contents", e)
+            raise GPMPlGenException("Could not download playlist contents", e)
         songs_from_static_playlists = []
         static_playlists_ids = map((lambda p: p['id']), static_playlists)
         for p in playlists_with_contents:
@@ -124,7 +124,7 @@ class GPMPlGen:
         try:
             playlists_from_gpm = self.client.get_all_playlists()
         except Exception as e:
-            GPMPlGenException("Could not download playlists", e)
+            raise GPMPlGenException("Could not download playlists", e)
         generated_playlists = []
         static_playlists = []
         for pl in playlists_from_gpm:
